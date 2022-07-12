@@ -1,70 +1,94 @@
+import { Epsilon } from "./constants";
+
 export class Vec2 {
-    public x: number;
-    public y: number;
+    private _value: [number, number];
 
     constructor(x: number, y: number) {
-        this.x = x;
-        this.y = y;
+        this._value = [x, y];
     }
 
-    add(other: Vec2): Vec2 {
-        return new Vec2(this.x + other.x, this.y + other.y);
+    public get x(): number { return this._value[0]; }
+    public get y(): number { return this._value[1]; }
+    public set x(x: number) { this._value[0] = x; }
+    public set y(y: number) { this._value[1] = y; }
+    public get gl(): Array<number> {
+        return [this.x, this.y];
     }
 
-    sub(other: Vec2): Vec2 {
-        return new Vec2(this.x - other.x, this.y - other.y);
+    public get lengthSq(): number {
+        return Vec2.dot(this, this);
     }
 
-    mul(scalar: number): Vec2 {
-        return new Vec2(this.x * scalar, this.y * scalar);
+    public get length(): number {
+        return Math.sqrt(this.lengthSq);
     }
 
-    div(scalar: number): Vec2 {
-        return new Vec2(this.x / scalar, this.y / scalar);
+    public static add(a: Vec2, b: Vec2): Vec2 {
+        return new Vec2(a.x + b.x, a.y + b.y);
     }
 
-    dot(other: Vec2): number {
-        return this.x * other.x + this.y * other.y;
+    public static sub(a: Vec2, b: Vec2): Vec2 {
+        return new Vec2(a.x - b.x, a.y - b.y);
     }
 
-    lerp(other: Vec2, t: number): Vec2 {
-        return this.add(other.sub(this).mul(t));
+    public static mul(a: Vec2, scalar: number): Vec2 {
+        return new Vec2(a.x * scalar, a.y * scalar);
     }
 
-    length(): number {
-        return Math.sqrt(this.dot(this));
+    public static div(a: Vec2, scalar: number): Vec2 {
+        return new Vec2(a.x / scalar, a.y / scalar);
     }
 
-    normalize(): Vec2 {
-        return this.div(this.length());
+    public static dot(a: Vec2, b: Vec2): number {
+        return a.x * b.x + a.y * b.y;
     }
 
-    static zero(): Vec2 {
-        return new Vec2(0, 0);
+    public static normalize(a: Vec2): Vec2 {
+        return Vec2.div(a, a.length);
     }
 
-    static one(): Vec2 {
-        return new Vec2(1, 1);
+    public static distance(a: Vec2, b: Vec2): number {
+        return Vec2.sub(a, b).length;
     }
 
-    static up(): Vec2 {
-        return new Vec2(0, 1);
+    public static rotation(angle: number): Vec2 {
+        let c = Math.cos(angle);
+        let s = Math.sin(angle);
+        return new Vec2(c, s);
     }
 
-    static down(): Vec2 {
-        return new Vec2(0, -1);
+    public static lerp(a: Vec2, b: Vec2, t: number): Vec2 {
+        return Vec2.add(Vec2.mul(a, 1 - t), Vec2.mul(b, t));
     }
 
-    static left(): Vec2 {
-        return new Vec2(-1, 0);
+    public add(b: Vec2): Vec2 {
+        this.x += b.x; this.y += b.y;
+        return this;
     }
 
-    static right(): Vec2 {
-        return new Vec2(1, 0);
+    public sub(b: Vec2): Vec2 {
+        this.x -= b.x; this.y -= b.y;
+        return this;
     }
 
-    static fromAngle(angle: number): Vec2 {
-        return new Vec2(Math.cos(angle), Math.sin(angle));
+    public mul(scalar: number): Vec2 {
+        this.x *= scalar; this.y *= scalar;
+        return this;
+    }
+
+    public div(scalar: number): Vec2 {
+        this.x /= scalar; this.y /= scalar;
+        return this;
+    }
+
+    public copy(): Vec2 {
+        return new Vec2(this.x, this.y);
+    }
+
+    public equals(b: Vec2): boolean {
+        const diff = Vec2.sub(this, b);
+        return Math.abs(diff.x) < Epsilon &&
+                Math.abs(diff.y) < Epsilon;
     }
 
 }

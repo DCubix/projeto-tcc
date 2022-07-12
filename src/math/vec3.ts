@@ -1,88 +1,95 @@
+import { Epsilon } from "./constants";
+
 export class Vec3 {
-    public x: number;
-    public y: number;
-    public z: number;
+    private _value: [number, number, number];
 
     constructor(x: number, y: number, z: number) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        this._value = [x, y, z];
     }
 
-    add(other: Vec3): Vec3 {
-        return new Vec3(this.x + other.x, this.y + other.y, this.z + other.z);
+    public get x(): number { return this._value[0]; }
+    public get y(): number { return this._value[1]; }
+    public get z(): number { return this._value[2]; }
+    public set x(x: number) { this._value[0] = x; }
+    public set y(y: number) { this._value[1] = y; }
+    public set z(z: number) { this._value[2] = z; }
+    public get gl(): Array<number> {
+        return [this.x, this.y, this.z];
     }
 
-    sub(other: Vec3): Vec3 {
-        return new Vec3(this.x - other.x, this.y - other.y, this.z - other.z);
+    public get lengthSq(): number {
+        return Vec3.dot(this, this);
     }
 
-    mul(scalar: number): Vec3 {
-        return new Vec3(this.x * scalar, this.y * scalar, this.z * scalar);
+    public get length(): number {
+        return Math.sqrt(this.lengthSq);
     }
 
-    div(scalar: number): Vec3 {
-        return new Vec3(this.x / scalar, this.y / scalar, this.z / scalar);
+    public static add(a: Vec3, b: Vec3): Vec3 {
+        return new Vec3(a.x + b.x, a.y + b.y, a.z + b.z);
     }
 
-    dot(other: Vec3): number {
-        return this.x * other.x + this.y * other.y + this.z * other.z;
+    public static sub(a: Vec3, b: Vec3): Vec3 {
+        return new Vec3(a.x - b.x, a.y - b.y, a.z - b.z);
     }
 
-    lerp(other: Vec3, t: number): Vec3 {
-        return this.add(other.sub(this).mul(t));
+    public static mul(a: Vec3, scalar: number): Vec3 {
+        return new Vec3(a.x * scalar, a.y * scalar, a.z * scalar);
     }
 
-    length(): number {
-        return Math.sqrt(this.dot(this));
+    public static div(a: Vec3, scalar: number): Vec3 {
+        return new Vec3(a.x / scalar, a.y / scalar, a.z / scalar);
     }
 
-    normalize(): Vec3 {
-        return this.div(this.length());
+    public static dot(a: Vec3, b: Vec3): number {
+        return a.x * b.x + a.y * b.y + a.z * b.z;
     }
 
-    static zero(): Vec3 {
-        return new Vec3(0, 0, 0);
+    public static normalize(a: Vec3): Vec3 {
+        return Vec3.div(a, a.length);
     }
 
-    static one(): Vec3 {
-        return new Vec3(1, 1, 1);
+    public static distance(a: Vec3, b: Vec3): number {
+        return Vec3.sub(a, b).length;
     }
 
-    static up(): Vec3 {
-        return new Vec3(0, 1, 0);
+    public static cross(a: Vec3, b: Vec3): Vec3 {
+        return new Vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
     }
 
-    static down(): Vec3 {
-        return new Vec3(0, -1, 0);
+    public static lerp(a: Vec3, b: Vec3, t: number): Vec3 {
+        return Vec3.add(Vec3.mul(a, 1 - t), Vec3.mul(b, t));
     }
 
-    static left(): Vec3 {
-        return new Vec3(-1, 0, 0);
+    public add(b: Vec3): Vec3 {
+        this.x += b.x; this.y += b.y; this.z += b.z;
+        return this;
     }
 
-    static right(): Vec3 {
-        return new Vec3(1, 0, 0);
+    public sub(b: Vec3): Vec3 {
+        this.x -= b.x; this.y -= b.y; this.z -= b.z;
+        return this;
     }
 
-    static forward(): Vec3 {
-        return new Vec3(0, 0, 1);
+    public mul(scalar: number): Vec3 {
+        this.x *= scalar; this.y *= scalar; this.z *= scalar;
+        return this;
     }
 
-    static backward(): Vec3 {
-        return new Vec3(0, 0, -1);
+    public div(scalar: number): Vec3 {
+        this.x /= scalar; this.y /= scalar; this.z /= scalar;
+        return this;
     }
 
-    cross(other: Vec3): Vec3 {
-        return new Vec3(
-            this.y * other.z - this.z * other.y,
-            this.z * other.x - this.x * other.z,
-            this.x * other.y - this.y * other.x
-        );
+    public copy(): Vec3 {
+        return new Vec3(this.x, this.y, this.z);
     }
 
-    static distance(a: Vec3, b: Vec3): number {
-        return a.sub(b).length();
+    public equals(b: Vec3): boolean {
+        const diff = Vec3.sub(this, b);
+        return Math.abs(diff.x) < Epsilon &&
+                Math.abs(diff.y) < Epsilon &&
+                Math.abs(diff.z) < Epsilon;
     }
 
 }
