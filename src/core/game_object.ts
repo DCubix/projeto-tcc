@@ -1,3 +1,4 @@
+import { Renderer } from "../graphics/renderer";
 import { Mat4 } from "../math/mat4";
 import { Vec3 } from "../math/vec3";
 
@@ -88,7 +89,7 @@ export abstract class GameObject {
         }
     }
 
-    public abstract onRender(): void; // TODO: Implement the Renderer
+    public abstract onRender(renderer: Renderer): void;
 
     private _updateModelMatrix(): void {
         const position = this.localPosition;

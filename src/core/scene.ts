@@ -1,3 +1,4 @@
+import { Renderer } from "../graphics/renderer";
 import { GameObject } from "./game_object";
 
 export class Scene {
@@ -33,9 +34,9 @@ export class Scene {
         }
     }
 
-    public render(): void {
+    public render(renderer: Renderer): void {
         for (let ob of this._gameObjects) {
-            ob.onRender();
+            ob.onRender(renderer);
         }
     }
 

@@ -127,6 +127,18 @@ export class Mat4 {
         return Mat4.mul(Mat4.mul(Mat4.rotationX(rot.x), Mat4.rotationY(rot.y)), Mat4.rotationZ(rot.z));
     }
 
+    public static rotation(forward: Vec3, up: Vec3): Mat4 {
+        let f = Vec3.normalize(forward);
+        let s = Vec3.normalize(Vec3.cross(f, up));
+        let u = Vec3.cross(s, f);
+        return new Mat4([
+            s.x, u.x, -f.x, 0,
+            s.y, u.y, -f.y, 0,
+            s.z, u.z, -f.z, 0,
+            0, 0, 0, 1
+        ]);
+    }
+
     public static transpose(a: Mat4): Mat4 {
         return new Mat4([
             a._value[0], a._value[4], a._value[8], a._value[12],

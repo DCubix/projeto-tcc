@@ -92,4 +92,10 @@ export class Vec3 {
                 Math.abs(diff.z) < Epsilon;
     }
 
+    private static _zero: Vec3 = new Vec3(0, 0, 0);
+    private static _one: Vec3 = new Vec3(1, 1, 1);
+
+    public static get zero(): Vec3 { return Vec3._zero; }
+    public static get one(): Vec3 { return Vec3._one; }
+
 }
