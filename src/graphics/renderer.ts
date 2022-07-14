@@ -39,24 +39,24 @@ class Renderable {
     public get material(): Material { return this._material; }
 
     public applyToShader(shader: Shader): void {
-        shader.setUniformMatrix4fv("modelMatrix", this._modelMatrix);
+        shader.setUniform("modelMatrix", this._modelMatrix);
 
         // material
-        shader.setUniform4f("diffuseColor", this._material.diffuseColor);
+        shader.setUniform("diffuseColor", this._material.diffuseColor);
         if (this._material.hasDiffuseTexture) {
-            shader.setUniform1i("diffuseTexture", 0);
-            shader.setUniform1f("diffuseIntensity", 1);
+            shader.setUniformTexture("diffuseTexture", 0);
+            shader.setUniformFloat("diffuseIntensity", 1);
             this._material.diffuseTexture!.bind(0);
         } else {
-            shader.setUniform1f("diffuseIntensity", 0);
+            shader.setUniformFloat("diffuseIntensity", 0);
         }
 
         if (this._material.hasEmissionTexture) {
-            shader.setUniform1i("emissionTexture", 1);
-            shader.setUniform1f("emissionIntensity", this._material.emissionIntensity);
+            shader.setUniformTexture("emissionTexture", 1);
+            shader.setUniformFloat("emissionIntensity", this._material.emissionIntensity);
             this._material.emissionTexture!.bind(1);
         } else {
-            shader.setUniform1f("emissionIntensity", 0);
+            shader.setUniformFloat("emissionIntensity", 0);
         }
     }
 }
@@ -125,8 +125,8 @@ export class Renderer {
 
         this._materialShader?.bind();
 
-        this._materialShader?.setUniformMatrix4fv("viewMatrix", this._viewMatrix);
-        this._materialShader?.setUniformMatrix4fv("projectionMatrix", this._projectionMatrix);
+        this._materialShader?.setUniform("viewMatrix", this._viewMatrix);
+        this._materialShader?.setUniform("projectionMatrix", this._projectionMatrix);
 
         for (const light of this._lights) {
             light.applyToShader(this._lights.indexOf(light), this._materialShader!);
