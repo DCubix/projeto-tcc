@@ -114,20 +114,10 @@ export class MeshBuilder {
         this._indices.push(index);
     }
 
-    public addIndexRelative(index: number): void {
-        this._indices.push(this._vertices.length + index);
-    }
-
-    public addTriangle(a: number, b: number, c: number, relative?: boolean): void {
-        if (relative) {
-            this.addIndexRelative(a);
-            this.addIndexRelative(b);
-            this.addIndexRelative(c);
-        } else {
-            this.addIndex(a);
-            this.addIndex(b);
-            this.addIndex(c);
-        }
+    public addTriangle(a: number, b: number, c: number): void {
+        this.addIndex(a);
+        this.addIndex(b);
+        this.addIndex(c);
     }
 
     public buildData(): [Vertex[], number[]] {

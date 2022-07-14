@@ -44,7 +44,7 @@ class Renderable {
         // material
         shader.setUniform("diffuseColor", this._material.diffuseColor);
         if (this._material.hasDiffuseTexture) {
-            shader.setUniformTexture("diffuseTexture", 0);
+            shader.setUniformInt("diffuseTexture", 0);
             shader.setUniformFloat("diffuseIntensity", 1);
             this._material.diffuseTexture!.bind(0);
         } else {
@@ -52,7 +52,7 @@ class Renderable {
         }
 
         if (this._material.hasEmissionTexture) {
-            shader.setUniformTexture("emissionTexture", 1);
+            shader.setUniformInt("emissionTexture", 1);
             shader.setUniformFloat("emissionIntensity", this._material.emissionIntensity);
             this._material.emissionTexture!.bind(1);
         } else {
@@ -131,6 +131,7 @@ export class Renderer {
         for (const light of this._lights) {
             light.applyToShader(this._lights.indexOf(light), this._materialShader!);
         }
+        this._materialShader?.setUniformInt("numLights", this._lights.length);
 
         for (const ren of this._renderables) {
             ren.applyToShader(this._materialShader!);

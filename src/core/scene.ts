@@ -14,12 +14,15 @@ export abstract class Scene {
     public get gameObjects(): GameObject[] { return this._gameObjects; }
 
     public abstract onSetup(): void;
+    public abstract onUpdate(deltaTime: number): void;
 
     public add(gameObject: GameObject): void {
         this._gameObjectsToAdd.push(gameObject);
     }
 
     public update(deltaTime: number): void {
+        this.onUpdate(deltaTime);
+
         for (let ob of this._gameObjectsToRemove) {
             this._gameObjects.splice(this._gameObjects.indexOf(ob), 1);
         }

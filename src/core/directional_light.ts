@@ -8,7 +8,7 @@ export class DirectionalLight extends GameObject {
     public color: Vector3;
     public intensity: number;
 
-    constructor(intensity: number, color: Vector3 = new Vector3(1, 1, 1)) {
+    constructor(intensity: number = 1.0, color: Vector3 = new Vector3(1, 1, 1)) {
         super();
         this.color = color;
         this.intensity = intensity;

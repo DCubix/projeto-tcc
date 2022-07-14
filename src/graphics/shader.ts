@@ -70,7 +70,7 @@ export class Shader {
         return this._attributes[name];
     }
 
-    public setUniformTexture(name: string, value: number): void {
+    public setUniformInt(name: string, value: number): void {
         const gl = Renderer.gl;
         gl.uniform1i(this.getUniformLocation(name), value);
     }

@@ -42,7 +42,7 @@ export abstract class GameObject {
     }
 
     public get globalPosition(): Vector3 {
-        return new Vector3(this.modelMatrix.transformAsPoint(this.localPosition));
+        return new Vector3(this.modelMatrix.transformAsPoint(new Vector3(0, 0, 0)));
     }
 
     public get dead(): boolean { return this._dead; }
