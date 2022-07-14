@@ -1,23 +1,21 @@
-import { Parser } from './gpcd/assembler';
-import { VirtualMachine } from './gpcd/vm';
+import { Camera } from "./core/camera";
+import { Engine } from "./core/engine";
+import { Scene } from "./core/scene";
+import { SpriteBlock } from "./core/sprite_block";
 
-const code = `main:
-    mov 100, #X
+class TestScene extends Scene {
+    public onSetup(): void {
+        console.log("TestScene.onSetup");
 
-_loop:
-    str #X, $0xC9+5
-    sub 1, #X
-    cmp #X, 4
-    jmc _loop
-    hlt
-`;
+        const cam = new Camera();
+        cam.localPosition.z = -8;
+        this.add(cam);
 
-let parser = new Parser(code);
-parser.parseAll();
-
-let vm = new VirtualMachine();
-vm.loadProgram(parser.programOutput);
-
-while (!vm.halted) {
-    vm.fetchAndRun();
+        const obj = new SpriteBlock();
+        this.add(obj);
+    }
 }
+
+const eng = new Engine(document.getElementById("game") as HTMLCanvasElement);
+eng.setScene(new TestScene());
+eng.start();

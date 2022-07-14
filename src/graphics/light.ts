@@ -1,4 +1,4 @@
-import { Vec3 } from "../math/vec3";
+import { Vector3 } from "@math.gl/core";
 import { Shader } from "./shader";
 
 export enum LightType {
@@ -7,13 +7,13 @@ export enum LightType {
 }
 
 export class Light {
-    public position: Vec3;
-    public color: Vec3;
+    public position: Vector3;
+    public color: Vector3;
     public intensity: number;
     public radius: number;
     public type: LightType;
 
-    public constructor(position: Vec3, color: Vec3, intensity: number, radius: number, type: LightType) {
+    public constructor(position: Vector3, color: Vector3, intensity: number, radius: number, type: LightType) {
         this.position = position;
         this.color = color;
         this.intensity = intensity;

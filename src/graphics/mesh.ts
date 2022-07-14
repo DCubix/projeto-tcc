@@ -1,14 +1,12 @@
-import { Mat4 } from "../math/mat4";
-import { Vec2 } from "../math/vec2";
-import { Vec3 } from "../math/vec3";
 import { Renderer } from "./renderer";
+import { Vector2, Vector3, Matrix4 } from "@math.gl/core";
 
 export class Vertex {
-    public position: Vec3;
-    public normal: Vec3;
-    public uv: Vec2;
+    public position: Vector3;
+    public normal: Vector3;
+    public uv: Vector2;
     
-    constructor(position: Vec3, normal: Vec3, uv: Vec2) {
+    constructor(position: Vector3, normal: Vector3, uv: Vector2) {
         this.position = position;
         this.normal = normal;
         this.uv = uv;
@@ -17,7 +15,7 @@ export class Vertex {
     public static Size(): number { return (3 + 3 + 2) * 4; }
 
     public copy(): Vertex {
-        return new Vertex(this.position.copy(), this.normal.copy(), this.uv.copy());
+        return new Vertex(this.position.clone(), this.normal.clone(), this.uv.clone());
     }
 
     public toArray(): number[] {
@@ -43,7 +41,19 @@ export class Mesh {
 
         gl.bindVertexArray(this._vao);
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
+        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Vertex.Size() * 4), gl.DYNAMIC_DRAW);
+
+        gl.enableVertexAttribArray(0);
+        gl.enableVertexAttribArray(1);
+        gl.enableVertexAttribArray(2);
+        
+        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, Vertex.Size(), 0);
+        gl.vertexAttribPointer(1, 3, gl.FLOAT, false, Vertex.Size(), 3 * 4);
+        gl.vertexAttribPointer(2, 2, gl.FLOAT, false, Vertex.Size(), (3 + 3) * 4);
+
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ibo);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([]), gl.DYNAMIC_DRAW);
+        gl.bindVertexArray(null);
     }
 
     public bind(): void {
@@ -96,6 +106,10 @@ export class MeshBuilder {
         this._vertices.push(vertex);
     }
 
+    public addVertices(vertices: Vertex[]): void {
+        this._vertices.push(...vertices);
+    }
+
     public addIndex(index: number): void {
         this._indices.push(index);
     }
@@ -104,38 +118,15 @@ export class MeshBuilder {
         this._indices.push(this._vertices.length + index);
     }
 
-    public addQuad(a: number, b: number, c: number, d: number): void {
-        this.addIndex(a);
-        this.addIndex(b);
-        this.addIndex(c);
-        this.addIndex(a);
-        this.addIndex(c);
-        this.addIndex(d);
-    }
-
-    public addQuadRelative(a: number, b: number, c: number, d: number): void {
-        this.addIndexRelative(a);
-        this.addIndexRelative(b);
-        this.addIndexRelative(c);
-        this.addIndexRelative(a);
-        this.addIndexRelative(c);
-        this.addIndexRelative(d);
-    }
-
-    public addQuadVertices(size: number, up: Vec3, offset: number, uvs: Vec2[]): void {
-        const normal = Vec3.normalize(up);
-        const forward = Vec3.cross(normal, new Vec3(0, 1, 0));
-        const lookat = Mat4.rotation(forward, normal);
-
-        const positions = [
-            Mat4.mulVec3(lookat, new Vec3(-size, -size, offset), 0),
-            Mat4.mulVec3(lookat, new Vec3(size, -size, offset), 0),
-            Mat4.mulVec3(lookat, new Vec3(size, size, offset), 0),
-            Mat4.mulVec3(lookat, new Vec3(-size, size, offset), 0)
-        ];
-
-        for (let i = 0; i < 4; i++) {
-            this.addVertex(new Vertex(positions[i], normal.copy(), uvs[i]));
+    public addTriangle(a: number, b: number, c: number, relative?: boolean): void {
+        if (relative) {
+            this.addIndexRelative(a);
+            this.addIndexRelative(b);
+            this.addIndexRelative(c);
+        } else {
+            this.addIndex(a);
+            this.addIndex(b);
+            this.addIndex(c);
         }
     }
 

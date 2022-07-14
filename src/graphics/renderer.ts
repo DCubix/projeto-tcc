@@ -1,12 +1,11 @@
-import { Mat4 } from "../math/mat4";
-import { Vec4 } from "../math/vec4";
+import { Matrix4, Vector3, Vector4 } from "@math.gl/core";
 import { Light } from "./light";
 import { Mesh } from "./mesh";
 import { Shader } from "./shader";
 import { Texture2D } from "./texture";
 
 export class Material {
-    public diffuseColor: Vec4 = new Vec4(1, 1, 1, 1);
+    public diffuseColor: Vector4 = new Vector4(1, 1, 1, 1);
 
     public diffuseTexture: Texture2D | null = null;
     public emissionTexture: Texture2D | null = null;
@@ -26,17 +25,17 @@ export class Material {
 
 class Renderable {
     private _mesh: Mesh;
-    private _modelMatrix: Mat4;
+    private _modelMatrix: Matrix4;
     private _material: Material;
 
-    public constructor(mesh: Mesh, modelMatrix: Mat4, material?: Material) {
+    public constructor(mesh: Mesh, modelMatrix: Matrix4, material?: Material) {
         this._mesh = mesh;
         this._modelMatrix = modelMatrix;
         this._material = material || Material.default;
     }
 
     public get mesh(): Mesh { return this._mesh; }
-    public get modelMatrix(): Mat4 { return this._modelMatrix; }
+    public get modelMatrix(): Matrix4 { return this._modelMatrix; }
     public get material(): Material { return this._material; }
 
     public applyToShader(shader: Shader): void {
@@ -72,8 +71,8 @@ export class Renderer {
     private _renderables: Renderable[] = [];
     private _lights: Light[] = [];
 
-    private _viewMatrix: Mat4;
-    private _projectionMatrix: Mat4;
+    private _viewMatrix: Matrix4;
+    private _projectionMatrix: Matrix4;
 
     private _materialShader: Shader | undefined;
 
@@ -94,15 +93,16 @@ export class Renderer {
         gl.clearDepth(1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        this._viewMatrix = Mat4.identity();
-        this._projectionMatrix = Mat4.identity();
+        this._viewMatrix = new Matrix4().identity();
+        this._projectionMatrix = new Matrix4().identity();
         
         this._initMaterialShader();
     }
 
     public get canvas(): HTMLCanvasElement { return this._canvas; }
+    public get aspectRatio(): number { return this._canvas.width / this._canvas.height; }
 
-    public queueRenderable(mesh: Mesh, modelMatrix: Mat4, material?: Material): void {
+    public queueRenderable(mesh: Mesh, modelMatrix: Matrix4, material?: Material): void {
         this._renderables.push(new Renderable(mesh, modelMatrix, material));
     }
 
@@ -113,11 +113,20 @@ export class Renderer {
         this._lights.push(light);
     }
 
-    public render(): void {
+    public setCamera(viewMatrix: Matrix4, projectionMatrix: Matrix4): void {
+        this._viewMatrix = viewMatrix;
+        this._projectionMatrix = projectionMatrix;
+    }
+
+    public render(backColor: Vector3): void {
         const gl = Renderer.gl;
+        gl.clearColor(backColor.x, backColor.y, backColor.z, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         this._materialShader?.bind();
+
+        this._materialShader?.setUniformMatrix4fv("viewMatrix", this._viewMatrix);
+        this._materialShader?.setUniformMatrix4fv("projectionMatrix", this._projectionMatrix);
 
         for (const light of this._lights) {
             light.applyToShader(this._lights.indexOf(light), this._materialShader!);
@@ -139,17 +148,17 @@ export class Renderer {
         const vs = `#version 300 es
         precision mediump float;
 
-        attribute vec3 a_position;
-        attribute vec3 a_normal;
-        attribute vec2 a_uv;
+        layout (location=0) in vec3 a_position;
+        layout (location=1) in vec3 a_normal;
+        layout (location=2) in vec2 a_uv;
 
         uniform mat4 modelMatrix;
         uniform mat4 viewMatrix;
         uniform mat4 projectionMatrix;
 
-        varying vec3 v_normal;
-        varying vec3 v_position;
-        varying vec2 v_uv;
+        out vec3 v_normal;
+        out vec3 v_position;
+        out vec2 v_uv;
 
         void main() {
             mat4 modelViewMatrix = viewMatrix * modelMatrix;
@@ -162,6 +171,8 @@ export class Renderer {
 
         const fs = `#version 300 es
         precision highp float;
+
+        out vec4 fragColor;
 
         struct Light {
             vec3 position;
@@ -182,9 +193,9 @@ export class Renderer {
         uniform Light lights[32];
         uniform int numLights;
 
-        varying vec3 v_normal;
-        varying vec3 v_position;
-        varying vec2 v_uv;
+        in vec3 v_normal;
+        in vec3 v_position;
+        in vec2 v_uv;
 
         void main() {
             vec4 diffuse = diffuseColor;
@@ -200,7 +211,7 @@ export class Renderer {
 
             // skip lighting if emission luma is equals or greater than 1.0
             if (dot(emission, vec3(0.2126, 0.7152, 0.0722)) >= 1.0) {
-                gl_FragColor = diffuse;
+                fragColor = diffuse;
                 return;
             }
 
@@ -236,7 +247,7 @@ export class Renderer {
                 }
             }
 
-            gl_FragColor = (diffuse * lighting) + emission;
+            fragColor = (diffuse * vec4(lighting, 1.0)) + vec4(emission, 0.0);
         }
         `;
 

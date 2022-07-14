@@ -1,7 +1,4 @@
-import { Mat4 } from "../math/mat4";
-import { Vec2 } from "../math/vec2";
-import { Vec3 } from "../math/vec3";
-import { Vec4 } from "../math/vec4";
+import { Matrix3, Matrix4, Vector2, Vector3, Vector4 } from "@math.gl/core";
 import { Renderer } from "./renderer";
 
 export class Shader {
@@ -73,34 +70,29 @@ export class Shader {
         return this._attributes[name];
     }
 
-    public setUniform1f(name: string, value: number): void {
-        const gl = Renderer.gl;
-        gl.uniform1f(this.getUniformLocation(name), value);
-    }
-
-    public setUniform1i(name: string, value: number): void {
+    public setUniformTexture(name: string, value: number): void {
         const gl = Renderer.gl;
         gl.uniform1i(this.getUniformLocation(name), value);
     }
 
-    public setUniform2f(name: string, value: Vec2): void {
+    public setUniformFloat(name: string, value: number): void {
         const gl = Renderer.gl;
-        gl.uniform2f(this.getUniformLocation(name), value.x, value.y);
+        gl.uniform1f(this.getUniformLocation(name), value);
     }
 
-    public setUniform3f(name: string, value: Vec3): void {
+    public setUniform(name: string, value: Vector2 | Vector3 | Vector4 | Matrix4): void {
         const gl = Renderer.gl;
-        gl.uniform3f(this.getUniformLocation(name), value.x, value.y, value.z);
-    }
-
-    public setUniform4f(name: string, value: Vec4): void {
-        const gl = Renderer.gl;
-        gl.uniform4f(this.getUniformLocation(name), value.x, value.y, value.z, value.w);
-    }
-
-    public setUniformMatrix4fv(name: string, value: Mat4): void {
-        const gl = Renderer.gl;
-        gl.uniformMatrix4fv(this.getUniformLocation(name), false, value.gl);
+        if (value instanceof Vector2) {
+            gl.uniform2fv(this.getUniformLocation(name), value);
+        } else if (value instanceof Vector3) {
+            gl.uniform3fv(this.getUniformLocation(name), value);
+        } else if (value instanceof Vector4) {
+            gl.uniform4fv(this.getUniformLocation(name), value);
+        } else if (value instanceof Matrix4) {
+            gl.uniformMatrix4fv(this.getUniformLocation(name), false, value);
+        } else {
+            throw new Error(`Unsupported uniform type ${value}`);
+        }
     }
 
 }

@@ -1,14 +1,14 @@
 import { Renderer } from "../graphics/renderer";
 import { Light, LightType } from "../graphics/light";
 import { GameObject } from "./game_object";
-import { Vec3 } from "../math/vec3";
+import { Vector3 } from "@math.gl/core";
 
 export class DirectionalLight extends GameObject {
     
-    public color: Vec3;
+    public color: Vector3;
     public intensity: number;
 
-    constructor(intensity: number, color: Vec3 = Vec3.one) {
+    constructor(intensity: number, color: Vector3 = new Vector3(1, 1, 1)) {
         super();
         this.color = color;
         this.intensity = intensity;

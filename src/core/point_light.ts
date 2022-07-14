@@ -1,15 +1,15 @@
+import { Vector3 } from "@math.gl/core";
 import { Light, LightType } from "../graphics/light";
 import { Renderer } from "../graphics/renderer";
-import { Vec3 } from "../math/vec3";
 import { GameObject } from "./game_object";
 
 export class PointLight extends GameObject {
 
-    public color: Vec3;
+    public color: Vector3;
     public intensity: number;
     public radius: number;
 
-    constructor(intensity: number, radius: number, color: Vec3 = Vec3.one) {
+    constructor(intensity: number, radius: number, color: Vector3 = new Vector3(1, 1, 1)) {
         super();
         this.color = color;
         this.intensity = intensity;

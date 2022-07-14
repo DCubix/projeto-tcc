@@ -1,14 +1,19 @@
+import { Vector3 } from "@math.gl/core";
 import { Renderer } from "../graphics/renderer";
 import { GameObject } from "./game_object";
 
-export class Scene {
+export abstract class Scene {
 
     private _gameObjects: GameObject[] = [];
 
     private _gameObjectsToAdd: GameObject[] = [];
     private _gameObjectsToRemove: GameObject[] = [];
 
+    public backgroundColor: Vector3 = new Vector3(0, 0, 0);
+
     public get gameObjects(): GameObject[] { return this._gameObjects; }
+
+    public abstract onSetup(): void;
 
     public add(gameObject: GameObject): void {
         this._gameObjectsToAdd.push(gameObject);
