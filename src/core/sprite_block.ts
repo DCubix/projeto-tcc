@@ -47,21 +47,11 @@ export class SpriteBlock extends GameObject {
             new Vector3(0, 0, -1)
         ];
 
-        const tw = 1.0 / Math.max(1, this.horizontalSpriteCount);
-        const th = 1.0 / Math.max(1, this.verticalSpriteCount);
-
         let offset = 0;
         for (let i = 0; i < BlockFace.Count; i++) {
             const n = faceNormals[i];
-            const tx = (this.spriteFaces[i] % this.horizontalSpriteCount) * tw;
-            const ty = Math.floor(this.spriteFaces[i] / this.horizontalSpriteCount) * th;
 
-            const uvs = [
-                new Vector2(tx, ty),
-                new Vector2(tx + tw, ty),
-                new Vector2(tx + tw, ty + th),
-                new Vector2(tx, ty + th)
-            ];
+            const uvs = this.getUVs(i);
             
             const positions = this.getPositions(i);
             mb.addVertices([
@@ -100,25 +90,11 @@ export class SpriteBlock extends GameObject {
         }
 
         if (facesChanged) {
-            const tw = 1.0 / Math.max(1, this.horizontalSpriteCount);
-            const th = 1.0 / Math.max(1, this.verticalSpriteCount);
-
             for (let j = 0; j < this.spriteFaces.length; j++) {
-                if (this.spriteFaces[j] === this._previousSpriteFaces[j]) {
-                    continue;
-                }
-                
-                const spr = this.spriteFaces[j];
-                const tx = (spr % this.horizontalSpriteCount) * tw;
-                const ty = Math.floor(spr / this.horizontalSpriteCount) * th;
-
-                const uvs = [
-                    new Vector2(tx, ty),
-                    new Vector2(tx + tw, ty),
-                    new Vector2(tx + tw, ty + th),
-                    new Vector2(tx, ty + th)
-                ];
-
+                // if (this.spriteFaces[j] === this._previousSpriteFaces[j]) {
+                //     continue;
+                // }
+                const uvs = this.getUVs(j);
                 for (let i = 0; i < 4; i++) {
                     this._vertices[i + (j*4)].uv = uvs[i];
                 }
@@ -129,6 +105,60 @@ export class SpriteBlock extends GameObject {
         }
 
         renderer.queueRenderable(this._mesh, this.modelMatrix, this.material);
+    }
+
+    private getUVs(face: BlockFace): Vector2[] {
+        const tw = 1.0 / Math.max(1, this.horizontalSpriteCount);
+        const th = 1.0 / Math.max(1, this.verticalSpriteCount);
+
+        const tx = (this.spriteFaces[face] % this.horizontalSpriteCount) * tw;
+        const ty = Math.floor(this.spriteFaces[face] / this.horizontalSpriteCount) * th;
+
+        switch (face) {
+            case BlockFace.Top:
+                return [
+                    new Vector2(tx, ty + th),
+                    new Vector2(tx + tw, ty + th),
+                    new Vector2(tx + tw, ty),
+                    new Vector2(tx, ty)
+                ];
+            case BlockFace.Bottom:
+                return [
+                    new Vector2(tx, ty + th),
+                    new Vector2(tx + tw, ty + th),
+                    new Vector2(tx + tw, ty),
+                    new Vector2(tx, ty)
+                ];
+            case BlockFace.Left:
+                return [
+                    new Vector2(tx + tw, ty),
+                    new Vector2(tx, ty),
+                    new Vector2(tx, ty + th),
+                    new Vector2(tx + tw, ty + th)
+                ];
+            case BlockFace.Right:
+                return [
+                    new Vector2(tx, ty + th),
+                    new Vector2(tx + tw, ty + th),
+                    new Vector2(tx + tw, ty),
+                    new Vector2(tx, ty)
+                ];
+            case BlockFace.Front:
+                return [
+                    new Vector2(tx, ty + th),
+                    new Vector2(tx + tw, ty + th),
+                    new Vector2(tx + tw, ty),
+                    new Vector2(tx, ty)
+                ];
+            case BlockFace.Back:
+                return [
+                    new Vector2(tx + tw, ty),
+                    new Vector2(tx, ty),
+                    new Vector2(tx, ty + th),
+                    new Vector2(tx + tw, ty + th)
+                ];
+            default: return [];
+        }
     }
 
     private getPositions(face: BlockFace): Vector3[] {

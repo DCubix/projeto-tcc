@@ -4,19 +4,25 @@ import { DirectionalLight } from "./core/directional_light";
 import { Engine } from "./core/engine";
 import { Scene } from "./core/scene";
 import { SpriteBlock } from "./core/sprite_block";
+import { Material } from "./graphics/renderer";
+import { Util } from "./core/util";
 
 class TestScene extends Scene {
     
     private _block: SpriteBlock | undefined;
 
-    public onSetup(): void {
+    public async onSetup() {
         console.log("TestScene.onSetup");
 
         const cam = new Camera();
-        cam.localPosition.z = 8.0;
+        cam.localPosition.z = 5.0;
         this.add(cam);
 
         this._block = new SpriteBlock();
+        this._block.material = new Material();
+        this._block.material.diffuseTexture = await Util.loadTexture("block.png");
+        this._block.horizontalSpriteCount = 6;
+        this._block.spriteFaces = [0, 1, 2, 3, 4, 5];
         this.add(this._block);
 
         const light = new DirectionalLight();
@@ -29,8 +35,9 @@ class TestScene extends Scene {
     public onUpdate(deltaTime: number): void {
         const blk = this._block!;
 
-        blk.localRotation.y += deltaTime;
         blk.localRotation.x += deltaTime;
+        blk.localRotation.y += deltaTime * 0.5;
+        blk.localRotation.z += deltaTime * -0.5;
     }
     
 }

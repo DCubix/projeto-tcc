@@ -49,7 +49,7 @@ export class Engine {
 
         if (this._currentScene) {
             this._currentScene.render(this._renderer);
-            this._renderer.render(this._currentScene.backgroundColor);
+            this._renderer.render(this._currentScene.backgroundColor, this._currentScene.ambientColor);
         }
 
         window.requestAnimationFrame(this._loop.bind(this));

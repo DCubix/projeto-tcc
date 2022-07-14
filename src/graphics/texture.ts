@@ -41,7 +41,7 @@ export class Texture2D {
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-    public update(data: Uint8Array): void {
+    public update(data: Uint8Array | Uint8ClampedArray): void {
         const gl = Renderer.gl;
         gl.bindTexture(gl.TEXTURE_2D, this._id);
         gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, this._width, this._height, gl.RGBA, gl.UNSIGNED_BYTE, data);
@@ -49,7 +49,7 @@ export class Texture2D {
         gl.bindTexture(gl.TEXTURE_2D, null);
     }
 
-    public updateSub(data: Uint8Array, x: number, y: number, width: number, height: number): void {
+    public updateSub(data: Uint8Array | Uint8ClampedArray, x: number, y: number, width: number, height: number): void {
         const gl = Renderer.gl;
         gl.bindTexture(gl.TEXTURE_2D, this._id);
         gl.texSubImage2D(gl.TEXTURE_2D, 0, x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, data);

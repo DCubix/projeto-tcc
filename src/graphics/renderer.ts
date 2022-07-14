@@ -118,7 +118,7 @@ export class Renderer {
         this._projectionMatrix = projectionMatrix;
     }
 
-    public render(backColor: Vector3): void {
+    public render(backColor: Vector3, ambientColor: Vector3 = new Vector3(0.1, 0.34, 0.7)): void {
         const gl = Renderer.gl;
         gl.clearColor(backColor.x, backColor.y, backColor.z, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -128,6 +128,7 @@ export class Renderer {
         this._materialShader?.setUniform("viewMatrix", this._viewMatrix);
         this._materialShader?.setUniform("projectionMatrix", this._projectionMatrix);
 
+        this._materialShader?.setUniform("ambientColor", ambientColor);
         for (const light of this._lights) {
             light.applyToShader(this._lights.indexOf(light), this._materialShader!);
         }
@@ -194,6 +195,8 @@ export class Renderer {
         uniform Light lights[32];
         uniform int numLights;
 
+        uniform vec3 ambientColor;
+
         in vec3 v_normal;
         in vec3 v_position;
         in vec2 v_uv;
@@ -218,7 +221,7 @@ export class Renderer {
 
             vec3 N = normalize(v_normal);
 
-            vec3 lighting = vec3(0, 0, 0);
+            vec3 lighting = ambientColor * 0.4;
             for (int i = 0; i < numLights; i++) {
                 Light light = lights[i];
                 if (light.intensity <= 0.0) {

@@ -10,6 +10,7 @@ export abstract class Scene {
     private _gameObjectsToRemove: GameObject[] = [];
 
     public backgroundColor: Vector3 = new Vector3(0, 0, 0);
+    public ambientColor: Vector3 = new Vector3(0.3, 0.15, 0.1);
 
     public get gameObjects(): GameObject[] { return this._gameObjects; }
 
