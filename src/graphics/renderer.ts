@@ -26,9 +26,9 @@ export class Material {
 class Renderable {
     private _mesh: Mesh;
     private _modelMatrix: Matrix4;
-    private _material: Material;
+    private _material: Material | null = null;
 
-    public constructor(mesh: Mesh, modelMatrix: Matrix4, material?: Material) {
+    public constructor(mesh: Mesh, modelMatrix: Matrix4, material?: Material | null) {
         this._mesh = mesh;
         this._modelMatrix = modelMatrix;
         this._material = material || Material.default;
@@ -36,25 +36,25 @@ class Renderable {
 
     public get mesh(): Mesh { return this._mesh; }
     public get modelMatrix(): Matrix4 { return this._modelMatrix; }
-    public get material(): Material { return this._material; }
+    public get material(): Material { return this._material || Material.default; }
 
     public applyToShader(shader: Shader): void {
         shader.setUniform("modelMatrix", this._modelMatrix);
 
         // material
-        shader.setUniform("diffuseColor", this._material.diffuseColor);
-        if (this._material.hasDiffuseTexture) {
+        shader.setUniform("diffuseColor", this.material.diffuseColor);
+        if (this.material.hasDiffuseTexture) {
             shader.setUniformInt("diffuseTexture", 0);
             shader.setUniformFloat("diffuseIntensity", 1);
-            this._material.diffuseTexture!.bind(0);
+            this.material.diffuseTexture!.bind(0);
         } else {
             shader.setUniformFloat("diffuseIntensity", 0);
         }
 
-        if (this._material.hasEmissionTexture) {
+        if (this.material.hasEmissionTexture) {
             shader.setUniformInt("emissionTexture", 1);
-            shader.setUniformFloat("emissionIntensity", this._material.emissionIntensity);
-            this._material.emissionTexture!.bind(1);
+            shader.setUniformFloat("emissionIntensity", this.material.emissionIntensity);
+            this.material.emissionTexture!.bind(1);
         } else {
             shader.setUniformFloat("emissionIntensity", 0);
         }
@@ -87,6 +87,8 @@ export class Renderer {
 
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.cullFace(gl.BACK);
         gl.frontFace(gl.CCW);
         gl.clearColor(0, 0, 0, 1);
@@ -102,7 +104,7 @@ export class Renderer {
     public get canvas(): HTMLCanvasElement { return this._canvas; }
     public get aspectRatio(): number { return this._canvas.width / this._canvas.height; }
 
-    public queueRenderable(mesh: Mesh, modelMatrix: Matrix4, material?: Material): void {
+    public queueRenderable(mesh: Mesh, modelMatrix: Matrix4, material?: Material | null): void {
         this._renderables.push(new Renderable(mesh, modelMatrix, material));
     }
 
@@ -166,7 +168,7 @@ export class Renderer {
             mat4 modelViewMatrix = viewMatrix * modelMatrix;
             gl_Position = projectionMatrix * modelViewMatrix * vec4(a_position, 1.0);
             v_normal = mat3(transpose(inverse(modelViewMatrix))) * a_normal;
-            v_position = vec3(modelViewMatrix * vec4(a_position, 1.0));
+            v_position = vec3(modelMatrix * vec4(a_position, 1.0));
             v_uv = a_uv;
         }
         `;
@@ -201,6 +203,10 @@ export class Renderer {
         in vec3 v_position;
         in vec2 v_uv;
 
+        float sqr2(float x) {
+            return x * x;
+        }
+
         void main() {
             vec4 diffuse = diffuseColor;
             vec3 emission = vec3(0, 0, 0);
@@ -221,33 +227,34 @@ export class Renderer {
 
             vec3 N = normalize(v_normal);
 
-            vec3 lighting = ambientColor * 0.4;
+            vec3 lighting = ambientColor;
             for (int i = 0; i < numLights; i++) {
                 Light light = lights[i];
                 if (light.intensity <= 0.0) {
                     continue;
                 }
 
+                vec3 L = vec3(0.0);
+                float att = 1.0;
+                vec3 Lp = light.position;
+
                 if (light.type == 0) {
-                    vec3 L = normalize(light.position);
-                    vec3 E = normalize(-v_position);
-
-                    float diffuseFactor = max(dot(N, L), 0.0);
-                    lighting += light.color * diffuseFactor * light.intensity;
+                    L = normalize(-light.position);
                 } else if (light.type == 1) {
-                    vec3 Lv = light.position - v_position;
-                    vec3 L = normalize(Lv);
-                    vec3 E = normalize(-v_position);
-                    float dist = length(Lv);
+                    L = light.position - v_position;
+                    float dist = length(L);
+                    L = normalize(L);
 
-                    if (dist > light.radius) {
-                        discard;
+                    if (dist < light.radius) {
+                        att = sqr2(clamp(1.0 - dist / light.radius, 0.0, 1.0));
                     } else {
-                        float diffuseFactor = max(dot(N, L), 0.0);
-                        float attenuation = 1.0 / (light.radius * light.radius);
-                        attenuation *= (light.radius * light.radius) / (dist * dist);
-                        lighting += light.color * diffuseFactor * attenuation * light.intensity;
+                        att = 0.0;
                     }
+                }
+
+                float NoL = max(dot(N, L), 0.0);
+                if (att > 0.0) {
+                    lighting += light.color * light.intensity * NoL * att;
                 }
             }
 

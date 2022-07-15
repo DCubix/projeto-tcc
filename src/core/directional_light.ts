@@ -21,7 +21,7 @@ export class DirectionalLight extends GameObject {
     }
 
     public onRender(renderer: Renderer): void {
-        const dir = this.globalPosition;
+        const dir = this.forward;
         renderer.queueLight(new Light(dir, this.color, this.intensity, 0, LightType.Directional));
     }
 

@@ -13,6 +13,8 @@ export class Engine {
     private _lastTime: number = 0;
     private _accumulator: number = 0;
 
+    private _loading: boolean = false;
+
     constructor(canvas: HTMLCanvasElement) {
         this._renderer = new Renderer(canvas);
     }
@@ -26,7 +28,7 @@ export class Engine {
         this._loop();
     }
 
-    private _loop(): void {
+    private _loop() {
         const now = performance.now();
         const deltaTime = (now - this._lastTime) / 1000;
         this._lastTime = now;
@@ -37,17 +39,20 @@ export class Engine {
             this._accumulator -= Engine.timeStep;
 
             if (this._nextScene) {
+                this._loading = true;
                 this._currentScene = this._nextScene;
-                this._currentScene.onSetup();
+                this._currentScene.onSetup().then(() => {
+                    this._loading = false;
+                });
                 this._nextScene = undefined;
             }
 
-            if (this._currentScene) {
+            if (this._currentScene && !this._loading) {
                 this._currentScene.update(Engine.timeStep);
             }
         }
 
-        if (this._currentScene) {
+        if (this._currentScene && !this._loading) {
             this._currentScene.render(this._renderer);
             this._renderer.render(this._currentScene.backgroundColor, this._currentScene.ambientColor);
         }

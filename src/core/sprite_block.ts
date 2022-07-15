@@ -15,7 +15,7 @@ export enum BlockFace {
 
 export class SpriteBlock extends GameObject {
 
-    public material: Material = Material.default;
+    public material: Material | null = null;
     public spriteFaces: number[];
     public horizontalSpriteCount: number = 1;
     public verticalSpriteCount: number = 1;
@@ -24,8 +24,8 @@ export class SpriteBlock extends GameObject {
 
     private _previousSpriteFaces: number[];
 
-    private _vertices: Vertex[];
-    private _indices: number[];
+    private _vertices: Vertex[] = [];
+    private _indices: number[] = [];
 
     constructor() {
         super();
@@ -33,10 +33,12 @@ export class SpriteBlock extends GameObject {
         this.spriteFaces.fill(0);
 
         this._previousSpriteFaces = new Array<number>(BlockFace.Count);
-        this._previousSpriteFaces.fill(0);
+        this._previousSpriteFaces.fill(1);
 
         this._mesh = new Mesh();
+    }
 
+    public onCreate(): void {
         const mb = new MeshBuilder();
         const faceNormals = [
             new Vector3(0, 1, 0),
@@ -51,9 +53,9 @@ export class SpriteBlock extends GameObject {
         for (let i = 0; i < BlockFace.Count; i++) {
             const n = faceNormals[i];
 
-            const uvs = this.getUVs(i);
+            const uvs = SpriteBlock.getUVs(i, this.spriteFaces, this.horizontalSpriteCount, this.verticalSpriteCount);
             
-            const positions = this.getPositions(i);
+            const positions = SpriteBlock.getPositions(i);
             mb.addVertices([
                 new Vertex(positions[0].multiplyByScalar(0.5).add(n.clone().multiplyByScalar(0.5)), n.clone(), uvs[0]),
                 new Vertex(positions[1].multiplyByScalar(0.5).add(n.clone().multiplyByScalar(0.5)), n.clone(), uvs[1]),
@@ -74,9 +76,6 @@ export class SpriteBlock extends GameObject {
         this._mesh.update(this._vertices, this._indices);
     }
 
-    public onCreate(): void {
-    }
-
     public onDestroy(): void {
     }
 
@@ -94,7 +93,7 @@ export class SpriteBlock extends GameObject {
                 // if (this.spriteFaces[j] === this._previousSpriteFaces[j]) {
                 //     continue;
                 // }
-                const uvs = this.getUVs(j);
+                const uvs = SpriteBlock.getUVs(j, this.spriteFaces, this.horizontalSpriteCount, this.verticalSpriteCount);
                 for (let i = 0; i < 4; i++) {
                     this._vertices[i + (j*4)].uv = uvs[i];
                 }
@@ -107,12 +106,12 @@ export class SpriteBlock extends GameObject {
         renderer.queueRenderable(this._mesh, this.modelMatrix, this.material);
     }
 
-    private getUVs(face: BlockFace): Vector2[] {
-        const tw = 1.0 / Math.max(1, this.horizontalSpriteCount);
-        const th = 1.0 / Math.max(1, this.verticalSpriteCount);
+    public static getUVs(face: BlockFace, spriteFaces: number[], horizontalSpriteCount: number, verticalSpriteCount: number): Vector2[] {
+        const tw = 1.0 / Math.max(1, horizontalSpriteCount);
+        const th = 1.0 / Math.max(1, verticalSpriteCount);
 
-        const tx = (this.spriteFaces[face] % this.horizontalSpriteCount) * tw;
-        const ty = Math.floor(this.spriteFaces[face] / this.horizontalSpriteCount) * th;
+        const tx = (spriteFaces[face] % horizontalSpriteCount) * tw;
+        const ty = Math.floor(spriteFaces[face] / horizontalSpriteCount) * th;
 
         switch (face) {
             case BlockFace.Top:
@@ -161,49 +160,97 @@ export class SpriteBlock extends GameObject {
         }
     }
 
-    private getPositions(face: BlockFace): Vector3[] {
+    public static getPositions(face: BlockFace, s: number = 1): Vector3[] {
         switch (face) {
             case BlockFace.Top:
                 return [
-                    new Vector3(-1, 0,  1),
-                    new Vector3( 1, 0,  1),
-                    new Vector3( 1, 0, -1),
-                    new Vector3(-1, 0, -1)
+                    new Vector3(-s, 0,  s),
+                    new Vector3( s, 0,  s),
+                    new Vector3( s, 0, -s),
+                    new Vector3(-s, 0, -s)
                 ];
             case BlockFace.Bottom:
                 return [
-                    new Vector3(-1, 0, -1),
-                    new Vector3( 1, 0, -1),
-                    new Vector3( 1, 0,  1),
-                    new Vector3(-1, 0,  1)
+                    new Vector3(-s, 0, -s),
+                    new Vector3( s, 0, -s),
+                    new Vector3( s, 0,  s),
+                    new Vector3(-s, 0,  s)
                 ];
             case BlockFace.Left:
                 return [
-                    new Vector3(0,  1,  1),
-                    new Vector3(0,  1, -1),
-                    new Vector3(0, -1, -1),
-                    new Vector3(0, -1,  1)
+                    new Vector3(0,  s,  s),
+                    new Vector3(0,  s, -s),
+                    new Vector3(0, -s, -s),
+                    new Vector3(0, -s,  s)
                 ];
             case BlockFace.Right:
                 return [
-                    new Vector3(0, -1,  1),
-                    new Vector3(0, -1, -1),
-                    new Vector3(0,  1, -1),
-                    new Vector3(0,  1,  1)
+                    new Vector3(0, -s,  s),
+                    new Vector3(0, -s, -s),
+                    new Vector3(0,  s, -s),
+                    new Vector3(0,  s,  s)
                 ];
             case BlockFace.Front:
                 return [
-                    new Vector3(-1, -1, 0),
-                    new Vector3( 1, -1, 0),
-                    new Vector3( 1,  1, 0),
-                    new Vector3(-1,  1, 0)
+                    new Vector3(-s, -s, 0),
+                    new Vector3( s, -s, 0),
+                    new Vector3( s,  s, 0),
+                    new Vector3(-s,  s, 0)
                 ];
             case BlockFace.Back:
                 return [
-                    new Vector3(-1,  1, 0),
-                    new Vector3( 1,  1, 0),
-                    new Vector3( 1, -1, 0),
-                    new Vector3(-1, -1, 0)
+                    new Vector3(-s,  s, 0),
+                    new Vector3( s,  s, 0),
+                    new Vector3( s, -s, 0),
+                    new Vector3(-s, -s, 0)
+                ];
+            default: return [];
+        }
+    }
+
+    public static getPositionsUnit(face: BlockFace): Vector3[] {
+        switch (face) {
+            case BlockFace.Top:
+                return [
+                    new Vector3(0, 0, 1),
+                    new Vector3(1, 0, 1),
+                    new Vector3(1, 0, 0),
+                    new Vector3(0, 0, 0)
+                ];
+            case BlockFace.Bottom:
+                return [
+                    new Vector3(0, 0, 0),
+                    new Vector3(1, 0, 0),
+                    new Vector3(1, 0, 1),
+                    new Vector3(0, 0, 1)
+                ];
+            case BlockFace.Left:
+                return [
+                    new Vector3(0, 1, 1),
+                    new Vector3(0, 1, 0),
+                    new Vector3(0, 0, 0),
+                    new Vector3(0, 0, 1)
+                ];
+            case BlockFace.Right:
+                return [
+                    new Vector3(0, 0, 1),
+                    new Vector3(0, 0, 0),
+                    new Vector3(0, 1, 0),
+                    new Vector3(0, 1, 1)
+                ];
+            case BlockFace.Front:
+                return [
+                    new Vector3(0, 0, 0),
+                    new Vector3(1, 0, 0),
+                    new Vector3(1, 1, 0),
+                    new Vector3(0, 1, 0)
+                ];
+            case BlockFace.Back:
+                return [
+                    new Vector3(0, 1, 0),
+                    new Vector3(1, 1, 0),
+                    new Vector3(1, 0, 0),
+                    new Vector3(0, 0, 0)
                 ];
             default: return [];
         }

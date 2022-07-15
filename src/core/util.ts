@@ -1,3 +1,4 @@
+import { Quaternion, Vector3 } from "@math.gl/core";
 import { Texture2D } from "../graphics/texture";
 
 export class Util {

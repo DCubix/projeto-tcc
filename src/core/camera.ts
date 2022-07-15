@@ -11,9 +11,14 @@ export class Camera extends GameObject {
     }
 
     public onRender(renderer: Renderer): void {
-        const viewMatrix = this.modelMatrix.clone().invert();
         const projectionMatrix = new Matrix4().perspective({ fovy: Math.PI / 4, aspect: renderer.aspectRatio, near: 0.01, far: 1000 });
-        renderer.setCamera(viewMatrix, projectionMatrix);
+        renderer.setCamera(this.viewMatrix, projectionMatrix);
+    }
+
+    public get viewMatrix(): Matrix4 {
+        const rot = new Matrix4().fromQuaternion(this.localRotation);
+        const loc = new Matrix4().translate(this.globalPosition.clone().negate());
+        return rot.multiplyRight(loc);
     }
 
 }
