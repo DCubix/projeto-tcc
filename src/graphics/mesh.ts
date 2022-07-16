@@ -29,7 +29,7 @@ export class Mesh {
     private _ibo: WebGLBuffer;
     private _vao: WebGLVertexArrayObject;
 
-    private _dataSize: number = 0;
+    private _vertexCount: number = 0;
     private _indexCount: number = 0;
 
     constructor() {
@@ -69,26 +69,24 @@ export class Mesh {
     public update(vertices: Vertex[], indices: number[]): void {
         const gl = Renderer.gl;
 
-        const sz = Vertex.Size() * vertices.length + indices.length * 4;
         const vertData = new Float32Array(vertices.map(v => v.toArray()).flat());
         const idxData = new Uint16Array(indices);
 
         gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
-        if (this._dataSize != sz) {
+        if (this._vertexCount != vertices.length) {
             gl.bufferData(gl.ARRAY_BUFFER, vertData, gl.DYNAMIC_DRAW);
+            this._vertexCount = vertices.length;
         } else {
             gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertData);
         }
 
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ibo);
-        if (this._dataSize != sz) {
+        if (this._indexCount != indices.length) {
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxData, gl.DYNAMIC_DRAW);
+            this._indexCount = indices.length;
         } else {
             gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, idxData);
         }
-
-        this._indexCount = indices.length;
-        this._dataSize = sz;
     }
 
     public get indexCount(): number {
