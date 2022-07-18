@@ -14,9 +14,21 @@ export class Engine {
     private _accumulator: number = 0;
 
     private _loading: boolean = false;
+    private _visible: boolean = true;
 
     constructor(canvas: HTMLCanvasElement) {
         this._renderer = new Renderer(canvas);
+
+        document.addEventListener("visibilitychange", () => {
+            this._visible = document.visibilityState === "visible";
+            if (this._visible) {
+                this._lastTime = performance.now();
+                console.log("page is visible");
+            } else {
+                this._accumulator = 0;
+                console.log("page is hidden");
+            }
+        });
     }
 
     public setScene(scene: Scene): void {
@@ -29,6 +41,12 @@ export class Engine {
     }
 
     private _loop() {
+        if (!this._visible) {
+            // skip rendering if page is not visible
+            requestAnimationFrame(() => this._loop());
+            return;
+        }
+
         const now = performance.now();
         const deltaTime = (now - this._lastTime) / 1000;
         this._lastTime = now;

@@ -1,5 +1,6 @@
 import { Renderer } from "./renderer";
-import { Vector2, Vector3, Matrix4 } from "@math.gl/core";
+import { Vector2, Vector3, Matrix4, Matrix3 } from "@math.gl/core";
+import { Region, UVGenerator } from "./uv_generator";
 
 export class Vertex {
     public position: Vector3;
@@ -123,6 +124,88 @@ export class MeshBuilder {
         this.addIndex(a + offset);
         this.addIndex(b + offset);
         this.addIndex(c + offset);
+    }
+
+    public addStick(
+        size: Vector2,
+        length: number,
+        rotation: number = 0,
+        top?: Region,
+        bottom?: Region,
+        left?: Region,
+        right?: Region,
+        front?: Region,
+        back?: Region
+    ): MeshBuilder {
+        const off = this._vertices.length;
+        const hs = size.clone().multiplyByScalar(0.5);
+
+        const topUVs = top ? top : UVGenerator.defaultRegion;
+        const bottomUVs = bottom ? bottom : UVGenerator.defaultRegion;
+        const leftUVs = left ? left : UVGenerator.defaultRegion;
+        const rightUVs = right ? right : UVGenerator.defaultRegion;
+        const frontUVs = front ? front : UVGenerator.defaultRegion;
+        const backUVs = back ? back : UVGenerator.defaultRegion;
+
+        const vertices: Vertex[] = [
+            // bottom face
+            new Vertex(new Vector3(-hs.x, 0, -hs.y), new Vector3(0, -1, 0), bottomUVs[0]),
+            new Vertex(new Vector3(hs.x, 0, -hs.y), new Vector3(0, -1, 0), bottomUVs[1]),
+            new Vertex(new Vector3(hs.x, 0, hs.y), new Vector3(0, -1, 0), bottomUVs[2]),
+            new Vertex(new Vector3(-hs.x, 0, hs.y), new Vector3(0, -1, 0), bottomUVs[3]),
+
+            // top face
+            new Vertex(new Vector3(-hs.x, length, -hs.y), new Vector3(0, 1, 0), topUVs[0]),
+            new Vertex(new Vector3(hs.x, length, -hs.y), new Vector3(0, 1, 0), topUVs[1]),
+            new Vertex(new Vector3(hs.x, length, hs.y), new Vector3(0, 1, 0), topUVs[2]),
+            new Vertex(new Vector3(-hs.x, length, hs.y), new Vector3(0, 1, 0), topUVs[3]),
+
+            // front face
+            new Vertex(new Vector3(-hs.x, length, hs.y), new Vector3(0, 0, 1), frontUVs[0]),
+            new Vertex(new Vector3(hs.x, length, hs.y), new Vector3(0, 0, 1), frontUVs[1]),
+            new Vertex(new Vector3(hs.x, 0, hs.y), new Vector3(0, 0, 1), frontUVs[2]),
+            new Vertex(new Vector3(-hs.x, 0, hs.y), new Vector3(0, 0, 1), frontUVs[3]),
+
+            // back face
+            new Vertex(new Vector3(-hs.x, 0, -hs.y), new Vector3(0, 0, -1), backUVs[2]),
+            new Vertex(new Vector3(hs.x, 0, -hs.y), new Vector3(0, 0, -1), backUVs[3]),
+            new Vertex(new Vector3(hs.x, length, -hs.y), new Vector3(0, 0, -1), backUVs[0]),
+            new Vertex(new Vector3(-hs.x, length, -hs.y), new Vector3(0, 0, -1), backUVs[1]),
+
+            // left face
+            new Vertex(new Vector3(-hs.x, length, -hs.y), new Vector3(-1, 0, 0), leftUVs[0]),
+            new Vertex(new Vector3(-hs.x, length, hs.y), new Vector3(-1, 0, 0), leftUVs[1]),
+            new Vertex(new Vector3(-hs.x, 0, hs.y), new Vector3(-1, 0, 0), leftUVs[2]),
+            new Vertex(new Vector3(-hs.x, 0, -hs.y), new Vector3(-1, 0, 0), leftUVs[3]),
+
+            // right face
+            new Vertex(new Vector3(hs.x, length, hs.y), new Vector3(1, 0, 0), rightUVs[0]),
+            new Vertex(new Vector3(hs.x, length, -hs.y), new Vector3(1, 0, 0), rightUVs[1]),
+            new Vertex(new Vector3(hs.x, 0, -hs.y), new Vector3(1, 0, 0), rightUVs[2]),
+            new Vertex(new Vector3(hs.x, 0, hs.y), new Vector3(1, 0, 0), rightUVs[3]),
+        ];
+
+        const indices: number[] = [
+            2, 1, 0, 0, 3, 2, // bottom face
+            4, 5, 6, 4, 6, 7, // top face
+            8, 9, 10, 8, 10, 11, // front face
+            12, 13, 14, 12, 14, 15, // back face
+            16, 17, 18, 16, 18, 19, // left face
+            20, 21, 22, 20, 22, 23, // right face
+        ];
+
+        const rot = new Matrix3().rotate(rotation);
+        for (let i = 0; i < vertices.length; i++) {
+            vertices[i].position.transformByMatrix3(rot);
+        }
+
+        this.addVertices(vertices);
+        for (let i = 0; i < indices.length; i++) {
+            indices[i] += off;
+        }
+        this._indices.push(...indices);
+
+        return this;
     }
 
     public recalculateNormals(): MeshBuilder {

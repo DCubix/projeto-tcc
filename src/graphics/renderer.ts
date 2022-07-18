@@ -90,7 +90,7 @@ export class Renderer {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         gl.cullFace(gl.BACK);
-        gl.frontFace(gl.CCW);
+        gl.frontFace(gl.CW);
         gl.clearColor(0, 0, 0, 1);
         gl.clearDepth(1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
