@@ -2,6 +2,7 @@ import { Matrix3, Matrix4, Quaternion, Vector2, Vector3, Vector4 } from "@math.g
 import { Mesh, MeshBuilder, Vertex } from "../graphics/mesh";
 import { Material, Renderer } from "../graphics/renderer";
 import { Rotation, UVGenerator } from "../graphics/uv_generator";
+import { AnimationPlayMode, KeyframeGenerators, Transform3D, TransformAnimator } from "./animation_engine";
 import { GameObject } from "./game_object";
 
 export enum LimbType {
@@ -36,6 +37,8 @@ export class Person extends GameObject {
 
     private _mesh: Mesh;
 
+    private _animator: TransformAnimator;
+
     constructor() {
         super();
         this._limbs[LimbType.LeftArm] = new Limb(new Quaternion(), new Vector3(0.2, 0.35, 0));
@@ -45,6 +48,19 @@ export class Person extends GameObject {
         this._limbs[LimbType.Head] = new Limb(new Quaternion(), new Vector3(0, 0.35, 0));
         this._limbs[LimbType.Torso] = new Limb(new Quaternion(), new Vector3(0, 0, 0));
         this._mesh = new Mesh();
+        this._animator = new TransformAnimator([ 'left-arm', 'right-arm', 'left-leg', 'right-leg', 'head' ]);
+
+        // walk animation
+        const span = Math.PI / 4;
+        this._animator.addAnimation('walk', {
+            'left-arm': KeyframeGenerators.pingPongRotationX(-span, span, 50),
+            'right-arm': KeyframeGenerators.pingPongRotationX(span, -span, 50),
+            'left-leg': KeyframeGenerators.pingPongRotationX(-span, span, 50),
+            'right-leg': KeyframeGenerators.pingPongRotationX(span, -span, 50),
+            'head': KeyframeGenerators.pingPongRotationX(0, -0.08, 50)
+        });
+
+        this._animator.play('walk', AnimationPlayMode.Loop, 1.5);
     }
 
     public onUpdate(delta: number): void {
@@ -170,6 +186,15 @@ export class Person extends GameObject {
     }
 
     private updateLimbs(): void {
+        // UPDATE ANIMATIONS
+        this._animator.update();
+
+        this._limbs[LimbType.LeftArm].rotation = this._animator.getTransform('left-arm').rotation || new Quaternion();
+        this._limbs[LimbType.RightArm].rotation = this._animator.getTransform('right-arm').rotation || new Quaternion();
+        this._limbs[LimbType.LeftLeg].rotation = this._animator.getTransform('left-leg').rotation || new Quaternion();
+        this._limbs[LimbType.RightLeg].rotation = this._animator.getTransform('right-leg').rotation || new Quaternion();
+        this._limbs[LimbType.Head].rotation = this._animator.getTransform('head').rotation || new Quaternion();
+
         this._verticesTransformed = [];
         for (let i = 0; i < this._limbs.length; i++) {
             if (i === LimbType.Torso) continue;

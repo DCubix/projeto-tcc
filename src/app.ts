@@ -69,13 +69,7 @@ class TestScene extends Scene {
 
         // rotate person
         const person = this.findByTag("person")[0] as Person;
-        // person.localRotation.rotateY(deltaTime * 0.5);
-
-        person.getLimb(LimbType.LeftArm).rotation.setFromAxisAngle(new Vector3(1, 0, 0), Math.sin(this._time) * Math.PI / 4);
-        person.getLimb(LimbType.RightArm).rotation.setFromAxisAngle(new Vector3(1, 0, 0), -Math.sin(this._time) * Math.PI / 4);
-
-        person.getLimb(LimbType.LeftLeg).rotation.setFromAxisAngle(new Vector3(1, 0, 0), Math.sin(this._time) * Math.PI / 4);
-        person.getLimb(LimbType.RightLeg).rotation.setFromAxisAngle(new Vector3(1, 0, 0), -Math.sin(this._time) * Math.PI / 4);
+        person.localRotation.rotateY(deltaTime * 0.5);
     }
     
 }
