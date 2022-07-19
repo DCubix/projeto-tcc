@@ -38,7 +38,7 @@ export abstract class Scene {
         this._gameObjectsToRemove = [];
 
         for (let ob of this._gameObjects) {
-            ob.onUpdate(deltaTime);
+            ob.update(deltaTime);
             if (ob.dead) {
                 this._gameObjectsToRemove.push(ob);
             }

@@ -1,4 +1,5 @@
 import { Renderer } from "../graphics/renderer";
+import { Input } from "./input";
 import { Scene } from "./scene";
 
 export class Engine {
@@ -29,6 +30,8 @@ export class Engine {
                 console.log("page is hidden");
             }
         });
+
+        Input.instance.install(canvas);
     }
 
     public setScene(scene: Scene): void {
@@ -69,6 +72,8 @@ export class Engine {
                 this._currentScene.update(Engine.timeStep);
             }
         }
+
+        Input.instance.update();
 
         if (this._currentScene && !this._loading) {
             this._currentScene.render(this._renderer);

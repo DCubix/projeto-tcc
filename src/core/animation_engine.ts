@@ -313,6 +313,13 @@ export class KeyframeGenerators {
 
     private static _pingPongFactors: number[] = [0.0, 0.5, 1.0, 0.5, 0.01];
 
+    public static empty(durationInFrames: number): { [time: number]: Transform3D } {
+        const result: { [time: number]: Transform3D } = {};
+        result[0] = new Transform3D();
+        result[durationInFrames] = new Transform3D();
+        return result;
+    }
+
     public static pingPongRotationX(start: number, end: number, durationInFrames: number): { [time: number]: Transform3D } {
         const result: { [time: number]: Transform3D } = {};
         const delta = end - start;
@@ -330,13 +337,13 @@ export class KeyframeGenerators {
     public static pingPongRotationY(start: number, end: number, durationInFrames: number): { [time: number]: Transform3D } {
         const result: { [time: number]: Transform3D } = {};
         const delta = end - start;
-        const step = durationInFrames / 3;
-        for (let i = 0; i < durationInFrames + step; i += step) {
+        const step = ~~(durationInFrames / KeyframeGenerators._pingPongFactors.length);
+        let t = 0;
+        for (let fac of KeyframeGenerators._pingPongFactors) {
             let quat = new Quaternion();
-            let t = i / (durationInFrames+step);
-            let sin = Math.sin(t * Math.PI);
-            quat.rotateY(start + delta * sin);
-            result[i] = new Transform3D(undefined, quat);
+            quat.rotateY(start + delta * fac);
+            result[~~t] = new Transform3D(undefined, quat);
+            t += step;
         }
         return result;
     }
@@ -344,13 +351,13 @@ export class KeyframeGenerators {
     public static pingPongRotationZ(start: number, end: number, durationInFrames: number): { [time: number]: Transform3D } {
         const result: { [time: number]: Transform3D } = {};
         const delta = end - start;
-        const step = durationInFrames / 3;
-        for (let i = 0; i < durationInFrames + step; i += step) {
+        const step = ~~(durationInFrames / KeyframeGenerators._pingPongFactors.length);
+        let t = 0;
+        for (let fac of KeyframeGenerators._pingPongFactors) {
             let quat = new Quaternion();
-            let t = i / (durationInFrames+step);
-            let sin = Math.sin(t * Math.PI);
-            quat.rotateZ(start + delta * sin);
-            result[i] = new Transform3D(undefined, quat);
+            quat.rotateZ(start + delta * fac);
+            result[~~t] = new Transform3D(undefined, quat);
+            t += step;
         }
         return result;
     }

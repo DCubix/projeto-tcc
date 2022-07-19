@@ -1,4 +1,5 @@
 import { Renderer } from "../graphics/renderer";
+import { Component } from "./component";
 import { Transform } from "./transform";
 
 export abstract class GameObject extends Transform {
@@ -9,6 +10,8 @@ export abstract class GameObject extends Transform {
     private _created: boolean = false;
 
     public tag: string = "";
+
+    public components: Component[] = [];
 
     constructor() {
         super();
@@ -29,19 +32,34 @@ export abstract class GameObject extends Transform {
         this.updateModelMatrix();
 
         if (!this._created) {
-            this.onCreate();
+            this.createEvent();
             this._created = true;
         }
 
         if (this._lifeTime > 0 && !this._dead) {
             this._life += deltaTime;
             if (this._life >= this._lifeTime) {
-                this.onDestroy();
+                this.destroyEvent();
                 this._dead = true;
             }
         }
     }
 
     public abstract onRender(renderer: Renderer): void;
+
+    private createEvent() {
+        this.onCreate();
+        this.components.forEach(component => component.onCreate(this));
+    }
+
+    private destroyEvent() {
+        this.components.forEach(component => component.onDestroy(this));
+        this.onDestroy();
+    }
+
+    public update(deltaTime: number) {
+        this.onUpdate(deltaTime);
+        this.components.forEach(component => component.onUpdate(this, deltaTime));
+    }
     
 }

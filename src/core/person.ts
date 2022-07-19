@@ -29,7 +29,6 @@ export class Person extends GameObject {
     public material: Material | null = null;
 
     private _limbs: Limb[] = [];
-    private _uvs: number[][][] = [];
 
     private _vertices: Vertex[] = [];
     private _indices: number[] = [];
@@ -51,16 +50,29 @@ export class Person extends GameObject {
         this._animator = new TransformAnimator([ 'left-arm', 'right-arm', 'left-leg', 'right-leg', 'head' ]);
 
         // walk animation
-        const span = Math.PI / 4;
+        const walkSpan = Math.PI / 4;
+        const idleSpan = Math.PI / 12;
         this._animator.addAnimation('walk', {
-            'left-arm': KeyframeGenerators.pingPongRotationX(-span, span, 50),
-            'right-arm': KeyframeGenerators.pingPongRotationX(span, -span, 50),
-            'left-leg': KeyframeGenerators.pingPongRotationX(-span, span, 50),
-            'right-leg': KeyframeGenerators.pingPongRotationX(span, -span, 50),
+            'left-arm': KeyframeGenerators.pingPongRotationX(-walkSpan, walkSpan, 50),
+            'right-arm': KeyframeGenerators.pingPongRotationX(walkSpan, -walkSpan, 50),
+            'left-leg': KeyframeGenerators.pingPongRotationX(-walkSpan, walkSpan, 50),
+            'right-leg': KeyframeGenerators.pingPongRotationX(walkSpan, -walkSpan, 50),
             'head': KeyframeGenerators.pingPongRotationX(0, -0.08, 50)
         });
 
-        this._animator.play('walk', AnimationPlayMode.Loop, 1.5);
+        this._animator.addAnimation('idle', {
+            'left-arm': KeyframeGenerators.pingPongRotationZ(0, idleSpan, 50),
+            'right-arm': KeyframeGenerators.pingPongRotationZ(0, -idleSpan, 50),
+            'left-leg': KeyframeGenerators.empty(50),
+            'right-leg': KeyframeGenerators.empty(50),
+            'head': KeyframeGenerators.pingPongRotationX(0, -0.08, 50)
+        });
+
+        this._animator.play('idle', AnimationPlayMode.Loop, 1.5);
+    }
+
+    public get animator(): TransformAnimator {
+        return this._animator;
     }
 
     public onUpdate(delta: number): void {
