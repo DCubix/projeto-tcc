@@ -58,7 +58,7 @@ export class Input {
         return this._mouseHeld[button];
     }
 
-    public getGamepad(index: number): Gamepad | null {
+    private getGamepad(index: number): Gamepad | null {
         let gp = null;
         for (let i = 0; i < this._gamepads.length; i++) {
             if (this._gamepads[i].index === index) {
@@ -67,6 +67,11 @@ export class Input {
             }
         }
         return gp;
+    }
+
+    public isGamepadConnected(index: number): boolean {
+        let gp = this.getGamepad(index);
+        return gp ? true : false;
     }
 
     public isGamepadButtonPressed(index: number, button: number): boolean {
@@ -78,19 +83,19 @@ export class Input {
     }
 
     public getGamepadAxis(index: number, axis: Axis): number {
-        // [ index, subtraction ]
-        const axisIndices = [
-            [ 0, 0 ], // x1
-            [ 1, 1 ], // y1
-            [ 5, 0 ], // x2
-            [ 2, 1 ]  // y2
+        // [ index, invert ]
+        const axisIndices: [number, boolean][] = [
+            [ 0, false ], // x1
+            [ 1, true ], // y1
+            [ 5, false ], // x2
+            [ 2, true ]  // y2
         ];
         let gp = this.getGamepad(index);
         if (gp) {
-            const idx = axisIndices[axis];
-            return gp.axes[idx[1]] - (gp.axes[idx[0]] * 0.5 + 0.5);
+            const [ idx, shouldInvert ] = axisIndices[axis];
+            return shouldInvert ? -gp.axes[idx] : gp.axes[idx];
         }
-        return 0;
+        return 0.0;
     }
 
     public install(canvas: HTMLCanvasElement): void {
@@ -149,6 +154,14 @@ export class Input {
         }
         for (let key in this._mouseReleased) {
             this._mouseReleased[key] = false;
+        }
+
+        // poll gamepads
+        this._gamepads = [];
+        for (let gp of navigator.getGamepads()) {
+            if (gp) {
+                this._gamepads.push(gp);
+            }
         }
     }
 

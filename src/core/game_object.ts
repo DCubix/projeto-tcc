@@ -11,7 +11,7 @@ export abstract class GameObject extends Transform {
 
     public tag: string = "";
 
-    public components: Component[] = [];
+    public components: Component<any>[] = [];
 
     constructor() {
         super();

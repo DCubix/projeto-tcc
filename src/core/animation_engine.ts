@@ -197,7 +197,8 @@ export class TransformAnimator {
     private _state: AnimatorState = AnimatorState.Stopped;
 
     private _time: number = 0; // time in frames
-    private _blendTime: number = 0; // time in frames
+    private _blendTimer: number = 0; // time in frames
+    private _blendTimeInFrames: number = 0; // time in frames
 
     private _transforms: { [name: string]: Transform3D } = {};
 
@@ -208,19 +209,32 @@ export class TransformAnimator {
     public play(
         name: string,
         mode: AnimationPlayMode = AnimationPlayMode.Loop,
-        speed: number = 1
+        speed: number = 1,
+        blendTime: number = 10
     ): void {
-        if (this._state === AnimatorState.Playing) {
-            this._nextAnimation = name;
-        } else {
-            this._currentAnimation = name;
-            this._state = AnimatorState.Playing;
-        }
-
         const anim = this._animations[name];
+        // const isDifferent = name !== this._currentAnimation ||
+        //     mode !== anim.mode ||
+        //     speed !== anim.speed;
+        
+        // if (!isDifferent) 
+        //     return;
+
         if (anim) {
             anim.mode = mode;
             anim.speed = speed;
+        }
+
+        if (this._state === AnimatorState.Playing) {
+            if (this._currentAnimation !== name) {
+                this._nextAnimation = name;
+                this._state = AnimatorState.Blending;
+                this._blendTimer = 0;
+                this._blendTimeInFrames = blendTime;
+            }
+        } else if (this._state === AnimatorState.Stopped) {
+            this._currentAnimation = name;
+            this._state = AnimatorState.Playing;
         }
     }
 
@@ -265,9 +279,9 @@ export class TransformAnimator {
         }
 
         this._time++;
-
+        
         if (this._state === AnimatorState.Playing) {
-            if (this._currentAnimation !== null && this._nextAnimation === null) {
+            if (this._currentAnimation !== null) {
                 const currentAnimation = this._animations[this._currentAnimation];
                 const t = this._time * currentAnimation.speed;
 
@@ -289,17 +303,17 @@ export class TransformAnimator {
             //     this._blendTime = 0;
             // }
         } else if (this._state === AnimatorState.Blending) {
-            this._blendTime++;
+            this._blendTimer++;
 
             const currentAnimation = this._animations[this._currentAnimation!];
             const nextAnimation = this._animations[this._nextAnimation!];
             const t = this._time * currentAnimation.speed;
             const t2 = this._time * nextAnimation.speed;
 
-            const blend = this._blendTime / 15; // TODO: Adjustable blend time, for now it's 15 frames
+            const blend = this._blendTimer / this._blendTimeInFrames;
             this.updateAnimation(currentAnimation, t, nextAnimation, t2, blend);
 
-            if (this._blendTime >= 15) {
+            if (this._blendTimer >= this._blendTimeInFrames) {
                 this._currentAnimation = this._nextAnimation;
                 this._nextAnimation = null;
                 this._state = AnimatorState.Playing;

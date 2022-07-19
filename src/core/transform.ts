@@ -71,7 +71,7 @@ export class Transform {
         this.localRotation.setFromAxisAngle(rotAxis, rotAngle);
     }
 
-    public alignToVector(from: Vector3, to: Vector3): void {
+    public fromToRotation(from: Vector3, to: Vector3): void {
         this.updateModelMatrix();
 
         function clamp(value: number, min: number, max: number): number {

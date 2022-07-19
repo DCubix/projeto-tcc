@@ -28,6 +28,7 @@ export class FSM<OwnerType extends GameObject> {
     public setState(name: string, oneShot: boolean = false): void {
         if (this._currentState !== name) {
             this._stateExecuted = false;
+            console.log(`FSM: ${this._currentState} -> ${name}`);
         }
         this._currentState = name;
         this._oneShot = oneShot;
@@ -38,7 +39,7 @@ export class FSM<OwnerType extends GameObject> {
             if (this._oneShot && !this._stateExecuted) {
                 this._states[this._currentState](owner, deltaTime);
                 this._stateExecuted = true;
-            } else {
+            } else if (!this._oneShot) {
                 this._states[this._currentState](owner, deltaTime);
             }
         }

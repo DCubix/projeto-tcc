@@ -216,11 +216,7 @@ export class VoxelMap extends GameObject {
 
         for (let x = 0; x < 32; x++) {
             for (let y = 0; y < 32; y++) {
-                let v = Math.abs(Math.sin((x / 32) * Math.PI * 2.0)) * Math.abs(Math.sin((y / 32) * Math.PI * 2.0));
-                let h = ~~(v * 12);
-                for (let z = 0; z < h; z++) {
-                    this.setID(x, y, z, 1);
-                }
+                this.setID(x, y, 0, 1);
             }
         }
 

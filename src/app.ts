@@ -9,6 +9,7 @@ import { Util } from "./core/util";
 import { PointLight } from "./core/point_light";
 import { VoxelMap } from "./core/voxel_map";
 import { LimbType, Person } from "./core/person";
+import { Player } from "./game/player";
 
 class TestScene extends Scene {
     
@@ -35,16 +36,19 @@ class TestScene extends Scene {
         // this._block.spriteFaces = [0, 1, 2, 3, 4, 5];
         // this.add(this._block);
 
-        // const map = new VoxelMap();
-        // map.tag = "map";
-        // map.material = new Material();
-        // map.material.diffuseTexture = await Util.loadTexture("voxels.png");
-        // this.add(map);
+        const map = new VoxelMap();
+        map.tag = "map";
+        map.material = new Material();
+        map.material.diffuseTexture = await Util.loadTexture("voxels.png");
+        this.add(map);
 
         const person = new Person();
         person.tag = "person";
         person.material = new Material();
         person.material.diffuseTexture = await Util.loadTexture("person.png");
+
+        person.components.push(new Player());
+
         this.add(person);
 
         const light = new DirectionalLight();
@@ -69,7 +73,6 @@ class TestScene extends Scene {
 
         // rotate person
         const person = this.findByTag("person")[0] as Person;
-        person.localRotation.rotateY(deltaTime * 0.5);
     }
     
 }
