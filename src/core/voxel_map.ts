@@ -84,7 +84,7 @@ export class VoxelMap extends GameObject {
         return voxel !== null && voxel.id !== 0;
     }
 
-    public update(): void {
+    public updateData(): void {
         const mb = new MeshBuilder();
 
         let offset = 0;
@@ -106,10 +106,10 @@ export class VoxelMap extends GameObject {
                         const vertexPos = new Vector3(x, z + 1, y);
 
                         offset += mb.addVertices([
-                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 1, 0), uv[0]),
-                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 1, 0), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 1, 0), uv[3]),
                             new Vertex(vertexPos.clone().add(pos[2]), new Vector3(0, 1, 0), uv[2]),
-                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 1, 0), uv[3])
+                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 1, 0), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 1, 0), uv[0]),
                         ]);
                     }
 
@@ -124,10 +124,10 @@ export class VoxelMap extends GameObject {
                         const vertexPos = new Vector3(x, z, y);
 
                         offset += mb.addVertices([
-                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, -1, 0), uv[0]),
-                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, -1, 0), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, -1, 0), uv[3]),
                             new Vertex(vertexPos.clone().add(pos[2]), new Vector3(0, -1, 0), uv[2]),
-                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, -1, 0), uv[3])
+                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, -1, 0), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, -1, 0), uv[0]),
                         ]);
                     }
 
@@ -142,10 +142,10 @@ export class VoxelMap extends GameObject {
                         const vertexPos = new Vector3(x, z, y);
 
                         offset += mb.addVertices([
-                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, -1), uv[0]),
-                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, -1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, -1), uv[3]),
                             new Vertex(vertexPos.clone().add(pos[2]), new Vector3(0, 0, -1), uv[2]),
-                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, -1), uv[3])
+                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, -1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, -1), uv[0]),
                         ]);
                     }
 
@@ -160,10 +160,10 @@ export class VoxelMap extends GameObject {
                         const vertexPos = new Vector3(x, z, y + 1);
 
                         offset += mb.addVertices([
-                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, 1), uv[0]),
-                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, 1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, 1), uv[3]),
                             new Vertex(vertexPos.clone().add(pos[2]), new Vector3(0, 0, 1), uv[2]),
-                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, 1), uv[3])
+                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, 1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, 1), uv[0]),
                         ]);
                     }
 
@@ -178,10 +178,10 @@ export class VoxelMap extends GameObject {
                         const vertexPos = new Vector3(x, z, y);
 
                         offset += mb.addVertices([
-                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, 1), uv[0]),
-                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, 1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, 1), uv[3]),
                             new Vertex(vertexPos.clone().add(pos[2]), new Vector3(0, 0, 1), uv[2]),
-                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, 1), uv[3])
+                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, 1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, 1), uv[0]),
                         ]);
                     }
 
@@ -196,10 +196,10 @@ export class VoxelMap extends GameObject {
                         const vertexPos = new Vector3(x + 1, z, y);
 
                         offset += mb.addVertices([
-                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, -1), uv[0]),
-                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, -1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, -1), uv[3]),
                             new Vertex(vertexPos.clone().add(pos[2]), new Vector3(0, 0, -1), uv[2]),
-                            new Vertex(vertexPos.clone().add(pos[3]), new Vector3(0, 0, -1), uv[3])
+                            new Vertex(vertexPos.clone().add(pos[1]), new Vector3(0, 0, -1), uv[1]),
+                            new Vertex(vertexPos.clone().add(pos[0]), new Vector3(0, 0, -1), uv[0]),
                         ]);
                     }
                 }
@@ -220,7 +220,7 @@ export class VoxelMap extends GameObject {
             }
         }
 
-        this.update();
+        this.updateData();
     }
 
     public onDestroy(): void {

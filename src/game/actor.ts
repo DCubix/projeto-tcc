@@ -26,6 +26,9 @@ export class Actor extends Component<Person> {
             const newRot = new Quaternion();
             newRot.setFromAxisAngle(new Vector3(0, 1, 0), angle);
             owner.localRotation.slerp(newRot, 0.12);
+
+            const fwd = owner.forward;
+            owner.localPosition.add(fwd.scale(deltaTime! * 3.0));
         });
     }
 

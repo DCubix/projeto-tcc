@@ -21,9 +21,9 @@ class TestScene extends Scene {
 
         const cam = new Camera();
         cam.tag = "camera";
-        cam.localPosition.z = 2.0;
-        cam.localPosition.y = 2.0;
-        cam.localPosition.x = 2.0;
+        cam.localPosition.z = 8.0;
+        cam.localPosition.y = 8.0;
+        cam.localPosition.x = 8.0;
         cam.localRotation.rotateX(Math.PI / 6);
         cam.localRotation.rotateY(-Math.PI / 4);
         // cam.lookAt(new Vector3(0, 0, 0));
@@ -40,6 +40,7 @@ class TestScene extends Scene {
         map.tag = "map";
         map.material = new Material();
         map.material.diffuseTexture = await Util.loadTexture("voxels.png");
+        map.localPosition.y = -1;
         this.add(map);
 
         const person = new Person();
@@ -52,7 +53,7 @@ class TestScene extends Scene {
         this.add(person);
 
         const light = new DirectionalLight();
-        light.localPosition.set(1, 1, -1);
+        light.localPosition.set(1, -1, -1);
         light.lookAt(new Vector3(0, 0, 0));
         light.tag = "light";
         this.add(light);
