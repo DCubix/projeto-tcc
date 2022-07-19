@@ -54,7 +54,7 @@ class TestScene extends Scene {
 
         const light = new DirectionalLight();
         light.localPosition.set(1, -1, -1);
-        light.lookAt(new Vector3(0, 0, 0));
+        light.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
         light.tag = "light";
         this.add(light);
 
@@ -63,7 +63,7 @@ class TestScene extends Scene {
 
     public onUpdate(deltaTime: number): void {
         this._time += deltaTime * 8.0;
-        // const cam = this.findByTag("camera")[0] as Camera;
+        const cam = this.findByTag("camera")[0] as Camera;
 
         // cam.localRotation.rotateY(deltaTime);
 
@@ -74,6 +74,18 @@ class TestScene extends Scene {
 
         // rotate person
         const person = this.findByTag("person")[0] as Person;
+
+        // camera follow person
+        const camPos = cam.localPosition;
+        const personPos = person.localPosition;
+
+        const camDistance = 6.0;
+
+        // smooth camera follow person
+        const vec = camPos.clone().subtract(personPos).normalize();
+        cam.lookAt(vec, new Vector3(0, 1, 0));
+
+        cam.localPosition = camPos.clone().lerp(personPos.clone().add(new Vector3(camDistance, camDistance, camDistance)), 0.15);
     }
     
 }

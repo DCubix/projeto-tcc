@@ -16,7 +16,7 @@ export class Camera extends GameObject {
     }
 
     public get viewMatrix(): Matrix4 {
-        const rot = new Matrix4().fromQuaternion(this.localRotation);
+        const rot = new Matrix4().fromQuaternion(this.localRotation.clone().conjugate());
         const loc = new Matrix4().translate(this.globalPosition.clone().negate());
         return rot.multiplyRight(loc);
     }

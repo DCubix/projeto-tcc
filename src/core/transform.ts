@@ -1,5 +1,11 @@
 import { Matrix4, Quaternion, Vector3 } from "@math.gl/core";
 
+function orthoNormalize(normal: Vector3, tangent: Vector3) {
+    normal.normalize();
+    tangent.normalize();
+    return tangent.cross(normal);
+}
+
 export class Transform {
 
     public localPosition: Vector3;
@@ -50,25 +56,19 @@ export class Transform {
         return new Vector3(this.modelMatrix.transformAsVector(new Vector3(0, 1, 0)));
     }
 
-    public lookAt(at: Vector3): void {
+    public lookAt(forward: Vector3, up: Vector3, factor: number = 1.0): void {
         this.updateModelMatrix();
-        
-        const fwd = new Vector3(0, 0, 1);
-        const forward = at.clone().subtract(this.globalPosition).normalize();
-        const dot = fwd.dot(forward);
-        if (Math.abs(dot + 1.0) < 1e-6) {
-            this.localRotation.set(0.0, 1.0, 0.0, Math.PI);
-            return;
-        }
-        
-        if (Math.abs(dot - 1.0) < 1e-6) {
-            this.localRotation.identity();
-            return;
-        }
+        forward.normalize();
+		const right = up.clone().cross(forward).normalize();
+		up = forward.clone().cross(right).normalize();
 
-        const rotAngle = Math.acos(dot);
-        let rotAxis = fwd.clone().cross(forward).normalize();
-        this.localRotation.setFromAxisAngle(rotAxis, rotAngle);
+        const ret = new Quaternion();
+        ret.w = Math.sqrt(1.0 + right.x + up.y + forward.z) * 0.5;
+        const w4_recip = 1.0 / (4.0 * ret.w);
+        ret.x = (up.z - forward.y) * w4_recip;
+        ret.y = (forward.x - right.z) * w4_recip;
+        ret.z = (right.y - up.x) * w4_recip;
+        this.localRotation.slerp(ret, factor);
     }
 
     public fromToRotation(from: Vector3, to: Vector3): void {
