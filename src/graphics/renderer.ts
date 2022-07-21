@@ -130,9 +130,6 @@ export class Renderer {
         this._materialShader?.setUniform("viewMatrix", this._viewMatrix);
         this._materialShader?.setUniform("projectionMatrix", this._projectionMatrix);
 
-        const eyePosition = new Vector3(this._viewMatrix.getTranslation());
-        this._materialShader?.setUniform("eyePosition", eyePosition);
-
         this._materialShader?.setUniform("ambientColor", ambientColor);
         for (const light of this._lights) {
             light.applyToShader(this._lights.indexOf(light), this._materialShader!);
@@ -200,8 +197,6 @@ export class Renderer {
         uniform Light lights[32];
         uniform int numLights;
 
-        uniform vec3 eyePosition;
-
         uniform vec3 ambientColor;
 
         in vec3 v_normal;
@@ -213,7 +208,6 @@ export class Renderer {
         }
 
         void main() {
-            vec3 V = normalize(eyePosition - v_position);
             vec4 diffuse = diffuseColor;
             vec3 emission = vec3(0, 0, 0);
 

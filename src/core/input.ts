@@ -99,11 +99,11 @@ export class Input {
     }
 
     public install(canvas: HTMLCanvasElement): void {
-        canvas.addEventListener("keydown", (event: KeyboardEvent) => {
+        window.addEventListener("keydown", (event: KeyboardEvent) => {
             this._keysPressed[event.key] = true;
             this._keysHeld[event.key] = true;
         });
-        canvas.addEventListener("keyup", (event: KeyboardEvent) => {
+        window.addEventListener("keyup", (event: KeyboardEvent) => {
             this._keysReleased[event.key] = true;
             this._keysHeld[event.key] = false;
         });

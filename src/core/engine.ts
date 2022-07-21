@@ -71,9 +71,9 @@ export class Engine {
             if (this._currentScene && !this._loading) {
                 this._currentScene.update(Engine.timeStep);
             }
-        }
 
-        Input.instance.update();
+            Input.instance.update();
+        }
 
         if (this._currentScene && !this._loading) {
             this._currentScene.render(this._renderer);
