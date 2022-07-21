@@ -130,7 +130,7 @@ export class Renderer {
         this._materialShader?.setUniform("viewMatrix", this._viewMatrix);
         this._materialShader?.setUniform("projectionMatrix", this._projectionMatrix);
 
-        const eyePosition = new Vector3(this._viewMatrix.getTranslation()).negate();
+        const eyePosition = new Vector3(this._viewMatrix.getTranslation());
         this._materialShader?.setUniform("eyePosition", eyePosition);
 
         this._materialShader?.setUniform("ambientColor", ambientColor);
@@ -208,11 +208,6 @@ export class Renderer {
         in vec3 v_position;
         in vec2 v_uv;
 
-        float rim(vec3 D, vec3 N) {
-            float cs = abs(dot(D, N));
-            return smoothstep(0.3, 1.0, 1.0 - cs);
-        }
-
         float sqr2(float x) {
             return x * x;
         }
@@ -269,8 +264,6 @@ export class Renderer {
                 float NoL = max(dot(N, L), 0.0);
                 if (att > 0.0) {
                     float fact = NoL * att;
-                    fact += rim(V, N) * fact;
-
                     lighting += light.color * light.intensity * fact;
                 }
             }

@@ -26,7 +26,7 @@ class TestScene extends Scene {
         cam.localPosition.x = 8.0;
         cam.localRotation.rotateX(Math.PI / 6);
         cam.localRotation.rotateY(-Math.PI / 4);
-        cam.fov = Math.radians(20);
+        cam.orthoSize = 2.5;
         // cam.lookAt(new Vector3(0, 0, 0));
         this.add(cam);
 
@@ -84,7 +84,7 @@ class TestScene extends Scene {
 
         // smooth camera follow person
         const vec = camPos.clone().subtract(personPos).normalize();
-        cam.lookAt(vec, new Vector3(0, 1, 0));
+        cam.lookAt(vec, new Vector3(0, 1, 0), 2);
 
         cam.localPosition = camPos.clone().lerp(personPos.clone().add(new Vector3(camDistance, camDistance, camDistance)), 0.15);
     }

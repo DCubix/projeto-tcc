@@ -68,7 +68,11 @@ export class Transform {
         ret.x = (up.z - forward.y) * w4_recip;
         ret.y = (forward.x - right.z) * w4_recip;
         ret.z = (right.y - up.x) * w4_recip;
-        this.localRotation.slerp(ret, factor);
+        if (factor >= 1.0) {
+            this.localRotation = ret;
+        } else {
+            this.localRotation.slerp(ret, factor);
+        }
     }
 
     public fromToRotation(from: Vector3, to: Vector3): void {

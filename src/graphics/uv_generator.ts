@@ -27,6 +27,14 @@ export class UVGenerator {
         this._textureHeight = textureHeight;
     }
 
+    private fixRegion(region: Region) {
+        const e = 1e-5;
+        for (let re of region) {
+            re.x -= e;
+            re.y -= e;
+        }
+    }
+
     addRawRegion(name: string, uvRegion: Region, rotation: Rotation = Rotation.Normal) {
         const rotations = [
             [0, 1, 2, 3],
@@ -38,6 +46,8 @@ export class UVGenerator {
             [2, 1, 0, 3]
         ];
         const rot = rotations[rotation];
+
+        this.fixRegion(uvRegion);
 
         const self = this;
         function norm(v: Vector2): Vector2 {
