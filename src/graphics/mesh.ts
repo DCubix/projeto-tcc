@@ -1,5 +1,5 @@
 import { Renderer } from "./renderer";
-import { Vector2, Vector3, Matrix4, Matrix3 } from "@math.gl/core";
+import { Vector2, Vector3, Matrix4, Matrix3, Quaternion } from "@math.gl/core";
 import { Region, UVGenerator } from "./uv_generator";
 
 export class Vertex {
@@ -205,6 +205,52 @@ export class MeshBuilder {
         }
         this._indices.push(...indices);
 
+        return this;
+    }
+
+    // public addTube(radius: number, length: number): MeshBuilder {
+    //     return this;
+    // }
+
+    // public eval(expr: string): MeshBuilder {
+    //     /**
+    //      * Expression parser
+    //      * <function> <param> <param> ..., ...
+    //      * Functions:
+    //      * C = cube
+    //      * T = tube
+    //      * S = stick
+    //      * tp = taper
+    //      * tr = translate
+    //      * sc = scale
+    //      * F = flip winding
+    //      * N = recalculate normals
+    //      * O = origin to center
+    //      */
+    //     let cursorPosition = new Vector3(0, 0, 0);
+    //     let cursorScale = new Vector3(1, 1, 1);
+
+    //     const statements = expr.split(/[,;]/);
+    //     for (let stmt of statements) {
+    //         let spl = stmt.split(/\s+/);
+    //         // from 1 to end = args
+    //         let args = spl.slice(1);
+    //         let cmd = spl[0];
+
+    //         switch (cmd) {
+
+    //         }
+    //     }
+
+    //     return this;
+    // }
+
+    public flipWinding(): MeshBuilder {
+        const indices = this._indices.slice();
+        this._indices = [];
+        for (let i = 0; i < indices.length; i += 3) {
+            this._indices.push(indices[i + 2], indices[i + 1], indices[i + 0]);
+        }
         return this;
     }
 

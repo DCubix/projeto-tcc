@@ -130,6 +130,9 @@ export class Renderer {
         this._materialShader?.setUniform("viewMatrix", this._viewMatrix);
         this._materialShader?.setUniform("projectionMatrix", this._projectionMatrix);
 
+        const eyePosition = new Vector3(this._viewMatrix.getTranslation()).negate();
+        this._materialShader?.setUniform("eyePosition", eyePosition);
+
         this._materialShader?.setUniform("ambientColor", ambientColor);
         for (const light of this._lights) {
             light.applyToShader(this._lights.indexOf(light), this._materialShader!);
@@ -197,26 +200,37 @@ export class Renderer {
         uniform Light lights[32];
         uniform int numLights;
 
+        uniform vec3 eyePosition;
+
         uniform vec3 ambientColor;
 
         in vec3 v_normal;
         in vec3 v_position;
         in vec2 v_uv;
 
+        float rim(vec3 D, vec3 N) {
+            float cs = abs(dot(D, N));
+            return smoothstep(0.3, 1.0, 1.0 - cs);
+        }
+
         float sqr2(float x) {
             return x * x;
         }
 
         void main() {
+            vec3 V = normalize(eyePosition - v_position);
             vec4 diffuse = diffuseColor;
             vec3 emission = vec3(0, 0, 0);
 
+            vec2 dx = dFdx(v_uv);
+            vec2 dy = dFdy(v_uv);
+
             if (diffuseIntensity > 0.0) {
-                diffuse *= texture(diffuseTexture, v_uv);
+                diffuse *= textureGrad(diffuseTexture, fract(v_uv), dx, dy);
             }
 
             if (emissionIntensity > 0.0) {
-                emission = texture(emissionTexture, v_uv).rgb * emissionIntensity;
+                emission = textureGrad(emissionTexture, fract(v_uv), dx, dy).rgb;
             }
 
             // skip lighting if emission luma is equals or greater than 1.0
@@ -254,7 +268,10 @@ export class Renderer {
 
                 float NoL = max(dot(N, L), 0.0);
                 if (att > 0.0) {
-                    lighting += light.color * light.intensity * NoL * att;
+                    float fact = NoL * att;
+                    fact += rim(V, N) * fact;
+
+                    lighting += light.color * light.intensity * fact;
                 }
             }
 

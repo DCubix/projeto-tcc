@@ -1,4 +1,4 @@
-import { Vector2, Vector4 } from "@math.gl/core";
+import { Vector2 } from "@math.gl/core";
 
 //typedef uv
 export type Region = [Vector2, Vector2, Vector2, Vector2];
@@ -13,7 +13,7 @@ export enum Rotation {
     RotateNegative270
 }
 
-export const GridSize = 5;
+export const GridSize = 4;
 
 export class UVGenerator {
 

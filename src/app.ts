@@ -26,6 +26,7 @@ class TestScene extends Scene {
         cam.localPosition.x = 8.0;
         cam.localRotation.rotateX(Math.PI / 6);
         cam.localRotation.rotateY(-Math.PI / 4);
+        cam.fov = Math.radians(20);
         // cam.lookAt(new Vector3(0, 0, 0));
         this.add(cam);
 

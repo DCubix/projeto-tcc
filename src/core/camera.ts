@@ -4,6 +4,8 @@ import { GameObject } from "./game_object";
 
 export class Camera extends GameObject {
 
+    public fov: number = Math.PI / 4;
+
     public onCreate(): void {
     }
 
@@ -11,7 +13,7 @@ export class Camera extends GameObject {
     }
 
     public onRender(renderer: Renderer): void {
-        const projectionMatrix = new Matrix4().perspective({ fovy: Math.PI / 4, aspect: renderer.aspectRatio, near: 0.01, far: 1000 });
+        const projectionMatrix = new Matrix4().perspective({ fovy: this.fov, aspect: renderer.aspectRatio, near: 0.01, far: 1000 });
         renderer.setCamera(this.viewMatrix, projectionMatrix);
     }
 

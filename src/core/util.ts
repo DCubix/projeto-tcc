@@ -27,3 +27,30 @@ export class Util {
     }
 
 }
+
+declare global {
+    interface Math {
+        lerp(from: number, to: number, factor: number): number;
+        clamp(value: number, min: number, max: number): number;
+        radians(degrees: number): number;
+        degrees(radians: number): number;
+    }
+}
+
+Math.lerp = function (from: number, to: number, factor: number): number {
+    return from + (to - from) * factor;
+};
+
+Math.radians = function (degrees: number): number {
+    return degrees * (Math.PI / 180);
+};
+
+Math.degrees = function (radians: number): number {
+    return radians * (180 / Math.PI);
+};
+
+Math.clamp = function (value: number, min: number, max: number): number {
+    return Math.min(Math.max(value, min), max);
+};
+
+export {};

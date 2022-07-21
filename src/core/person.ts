@@ -85,37 +85,43 @@ export class Person extends GameObject {
         let mb = new MeshBuilder();
         let uvg = new UVGenerator(tex?.width || 1, tex?.height || 1);
 
-        uvg.addRegion('head:top', 6, 0, 8, 6);
-        uvg.addRegion('head:bottom', 15, 0, 8, 6);
-        uvg.addRegion('head:left', 0, 6, 6, 7);
-        uvg.addRegion('head:right', 14, 6, 6, 7);
-        uvg.addRegion('head:front', 6, 6, 8, 7);
-        uvg.addRegion('head:back', 20, 6, 8, 7);
+        uvg.addRegion('head:top', 5, 0, 5, 5);
+        uvg.addRegion('head:bottom', 0, 0, 5, 5);
+        uvg.addRegion('head:left', 0, 5, 5, 5);
+        uvg.addRegion('head:right', 10, 5, 5, 5);
+        uvg.addRegion('head:front', 5, 5, 5, 5);
+        uvg.addRegion('head:back', 15, 5, 5, 5);
 
-        uvg.addRegion('torso:top', 20, 13, 6, 4);
-        uvg.addRegion('torso:bottom', 26, 13, 6, 4);
-        uvg.addRegion('torso:left', 16, 17, 4, 7);
-        uvg.addRegion('torso:right', 26, 17, 4, 7);
-        uvg.addRegion('torso:front', 20, 17, 6, 7);
-        uvg.addRegion('torso:back', 30, 17, 6, 7);
+        uvg.addRegion('torso:top', 21, 10, 5, 3);
+        uvg.addRegion('torso:bottom', 16, 10, 5, 3);
+        uvg.addRegion('torso:left', 8, 10, 3, 5);
+        uvg.addRegion('torso:right', 0, 10, 3, 5);
+        uvg.addRegion('torso:front', 3, 10, 5, 5);
+        uvg.addRegion('torso:back', 11, 10, 5, 5);
 
-        uvg.addRegion('leg:top', 2, 13, 2, 2);
-        uvg.addRegion('leg:bottom', 4, 13, 2, 2);
-        uvg.addRegion('leg:left', 0, 15, 2, 6);
-        uvg.addRegion('leg:front', 2, 15, 2, 6);
-        uvg.addRegion('leg:right', 4, 15, 2, 6);
-        uvg.addRegion('leg:back', 6, 15, 2, 6);
+        uvg.addRegion('leg:top', 28, 0, 2, 2);
+        uvg.addRegion('leg:bottom', 28, 2, 2, 2);
+        uvg.addRegion('leg:left', 20, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('leg:front', 22, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('leg:right', 24, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('leg:back', 26, 0, 2, 5, Rotation.Rotate180);
 
-        uvg.addRegion('arm:top', 12, 13, 2, 2);
-        uvg.addRegion('arm:bottom', 10, 13, 2, 2);
-        uvg.addRegion('arm:left', 8, 15, 2, 6, Rotation.Rotate180);
-        uvg.addRegion('arm:front', 10, 15, 2, 6, Rotation.Rotate180);
-        uvg.addRegion('arm:right', 12, 15, 2, 6, Rotation.Rotate180);
-        uvg.addRegion('arm:back', 14, 15, 2, 6, Rotation.Rotate180);
+        uvg.addRegion('arm:top', 18, 0, 2, 2);
+        uvg.addRegion('arm:bottom', 18, 2, 2, 2);
+        uvg.addRegion('arm:left', 10, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('arm:front', 12, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('arm:right', 14, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('arm:back', 16, 0, 2, 5, Rotation.Rotate180);
         
+        const pixel = 1.0 / 60;
+        const unit = pixel * 4;
+        const unit2 = unit * 2;
+        const unit3 = unit * 3;
+        const unit5 = unit * 5;
+
         // left arm region
         mb.addStick(
-            new Vector2(0.1, 0.1), 0.3, Math.PI,
+            new Vector2(unit2, unit2), unit5, Math.PI,
             uvg.getRegion('arm:top'),
             uvg.getRegion('arm:bottom'),
             uvg.getRegion('arm:left'),
@@ -126,7 +132,7 @@ export class Person extends GameObject {
 
         // right arm region
         mb.addStick(
-            new Vector2(0.1, 0.1), 0.3, Math.PI,
+            new Vector2(unit2, unit2), unit5, Math.PI,
             uvg.getRegion('arm:top'),
             uvg.getRegion('arm:bottom'),
             uvg.getRegion('arm:left'),
@@ -137,7 +143,7 @@ export class Person extends GameObject {
 
         // left leg region
         mb.addStick(
-            new Vector2(0.1, 0.1), 0.3, Math.PI,
+            new Vector2(unit2, unit2), unit5, Math.PI,
             uvg.getRegion('leg:top'),
             uvg.getRegion('leg:bottom'),
             uvg.getRegion('leg:left'),
@@ -148,7 +154,7 @@ export class Person extends GameObject {
 
         // right leg region
         mb.addStick(
-            new Vector2(0.1, 0.1), 0.3, Math.PI,
+            new Vector2(unit2, unit2), unit5, Math.PI,
             uvg.getRegion('leg:top'),
             uvg.getRegion('leg:bottom'),
             uvg.getRegion('leg:left'),
@@ -159,7 +165,7 @@ export class Person extends GameObject {
 
         // head region
         mb.addStick(
-            new Vector2(0.4, 0.3), 0.35, 0,
+            new Vector2(unit5, unit5), unit5, 0,
             uvg.getRegion('head:top'),
             uvg.getRegion('head:bottom'),
             uvg.getRegion('head:left'),
@@ -170,7 +176,7 @@ export class Person extends GameObject {
 
         // torso region. Each region has 24 vertices.
         mb.addStick(
-            new Vector2(0.3, 0.2), 0.35, 0,
+            new Vector2(unit5, unit3), unit5, 0,
             uvg.getRegion('torso:top'),
             uvg.getRegion('torso:bottom'),
             uvg.getRegion('torso:left'),

@@ -29,8 +29,8 @@ export class Player extends Actor {
             }
         }
 
-        this._direction.x = -axisX;
-        this._direction.z = -axisY;
+        this._direction.z = axisX;
+        this._direction.x = -axisY;
 
         if (this._direction.lengthSquared() > 0.1) {
             this._direction.normalize();
