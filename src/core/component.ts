@@ -1,9 +1,11 @@
 import { GameObject } from "./game_object";
 
-export abstract class Component<OwnerType extends GameObject> {
+export abstract class Component {
 
-    public abstract onCreate(owner: OwnerType): void;
-    public abstract onUpdate(owner: OwnerType, deltaTime: number): void;
-    public abstract onDestroy(owner: OwnerType): void;
+    public owner?: GameObject;
+
+    public abstract onCreate(): void;
+    public abstract onUpdate(deltaTime: number): void;
+    public abstract onDestroy(): void;
 
 }

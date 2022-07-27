@@ -11,7 +11,7 @@ export abstract class GameObject extends Transform {
 
     public tag: string = "";
 
-    public components: Component<any>[] = [];
+    private _components: Component[] = [];
 
     constructor() {
         super();
@@ -20,6 +20,11 @@ export abstract class GameObject extends Transform {
     }
 
     public get dead(): boolean { return this._dead; }
+
+    public addComponent(component: Component): void {
+        component.owner = this;
+        this._components.push(component);
+    }
 
     public destroy(lifeTime: number = 0): void {
         this._lifeTime = lifeTime;
@@ -49,17 +54,17 @@ export abstract class GameObject extends Transform {
 
     private createEvent() {
         this.onCreate();
-        this.components.forEach(component => component.onCreate(this));
+        this._components.forEach(component => component.onCreate());
     }
 
     private destroyEvent() {
-        this.components.forEach(component => component.onDestroy(this));
+        this._components.forEach(component => component.onDestroy());
         this.onDestroy();
     }
 
     public update(deltaTime: number) {
         this.onUpdate(deltaTime);
-        this.components.forEach(component => component.onUpdate(this, deltaTime));
+        this._components.forEach(component => component.onUpdate(deltaTime));
     }
     
 }

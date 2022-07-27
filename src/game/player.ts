@@ -9,7 +9,7 @@ export class Player extends Actor {
         super();
     }
 
-    public onUpdate(owner: GameObject, deltaTime: number): void {
+    public onUpdate(deltaTime: number): void {
         const inp = Input.instance;
         let axisX = 0.0, axisY = 0.0;
         if (inp.isGamepadConnected(0)) {
@@ -39,7 +39,7 @@ export class Player extends Actor {
             this._fsm.setState("idle", true);
         }
 
-        super.onUpdate(owner, deltaTime);
+        super.onUpdate(deltaTime);
     }
 
 }

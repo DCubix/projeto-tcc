@@ -5,7 +5,7 @@ import { FSM } from "../core/fsm";
 import { GameObject } from "../core/game_object";
 import { Person } from "../core/person";
 
-export class Actor extends Component<Person> {
+export class Actor extends Component {
 
     protected _fsm: FSM<Person>;
     protected _direction: Vector3 = new Vector3(0, 0, 1);
@@ -32,15 +32,15 @@ export class Actor extends Component<Person> {
         });
     }
 
-    public onCreate(owner: GameObject): void {
+    public onCreate(): void {
         this._fsm.setState("idle", true);
     }
 
-    public onUpdate(owner: GameObject, deltaTime: number): void {
-        this._fsm.update(owner as Person, deltaTime);
+    public onUpdate(deltaTime: number): void {
+        this._fsm.update(this.owner as Person, deltaTime);
     }
 
-    public onDestroy(owner: GameObject): void {
+    public onDestroy(): void {
         
     }
 
