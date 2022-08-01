@@ -54,17 +54,29 @@ class TestScene extends Scene {
         this.add(person);
 
         const light = new DirectionalLight();
-        light.localPosition.set(1, -1, -1);
-        light.lookAt(new Vector3(0, 0, 0), new Vector3(0, 1, 0));
         light.tag = "light";
+        light.localPosition.y = 2.0;
+        light.localPosition.z = 2.0;
+        light.localPosition.x = 2.0;
+        light.fromToRotation(light.localPosition, new Vector3(0, 0, 0));
         this.add(light);
 
-        this.backgroundColor = new Vector3(0.0, 0.1, 0.3);
+        // const light = new PointLight(2.0, 10.0);
+        // light.localPosition.set(0, 0, 0);
+        // light.tag = "light";
+        // this.add(light);
+
+        // light.setParent(person);
     }
 
     public onUpdate(deltaTime: number): void {
-        this._time += deltaTime * 8.0;
+        this._time += deltaTime;
         const cam = this.findByTag("camera")[0] as Camera;
+
+        // const light = this.findByTag("light")[0] as PointLight;
+        // light.localPosition.x = Math.cos(this._time) * 2.0;
+        // light.localPosition.z = Math.sin(this._time) * 2.0;
+        // light.localPosition.y = 0.5;
 
         // cam.localRotation.rotateY(deltaTime);
 

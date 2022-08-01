@@ -83,14 +83,14 @@ export class Person extends GameObject {
     public onCreate(): void {
         const tex = this.material?.diffuseTexture;
         let mb = new MeshBuilder();
-        let uvg = new UVGenerator(tex?.width || 1, tex?.height || 1);
+        let uvg = new UVGenerator(tex?.width || 1, tex?.height || 1, 16);
 
-        uvg.addRegion('head:top', 5, 0, 5, 5);
-        uvg.addRegion('head:bottom', 0, 0, 5, 5);
-        uvg.addRegion('head:left', 0, 5, 5, 5);
-        uvg.addRegion('head:right', 10, 5, 5, 5);
-        uvg.addRegion('head:front', 5, 5, 5, 5);
-        uvg.addRegion('head:back', 15, 5, 5, 5);
+        uvg.addRegion('head:bottom', 0, 0, 1, 1);
+        uvg.addRegion('head:top', 1, 0, 1, 1);
+        uvg.addRegion('head:left', 0, 1, 1, 1);
+        uvg.addRegion('head:right', 1, 1, 1, 1);
+        uvg.addRegion('head:front', 2, 1, 1, 1);
+        uvg.addRegion('head:back', 3, 1, 1, 1);
 
         uvg.addRegion('torso:top', 21, 10, 5, 3);
         uvg.addRegion('torso:bottom', 16, 10, 5, 3);

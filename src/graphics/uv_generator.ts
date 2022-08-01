@@ -13,26 +13,18 @@ export enum Rotation {
     RotateNegative270
 }
 
-export const GridSize = 4;
-
 export class UVGenerator {
 
     private _uvRegions: { [name: string]: Region };
     private _textureWidth: number;
     private _textureHeight: number;
+    private _gridSize: number;
 
-    constructor(textureWidth: number, textureHeight: number) {
+    constructor(textureWidth: number, textureHeight: number, gridSize: number = 1) {
         this._uvRegions = {};
         this._textureWidth = textureWidth;
         this._textureHeight = textureHeight;
-    }
-
-    private fixRegion(region: Region) {
-        const e = 1e-5;
-        for (let re of region) {
-            re.x -= e;
-            re.y -= e;
-        }
+        this._gridSize = gridSize;
     }
 
     addRawRegion(name: string, uvRegion: Region, rotation: Rotation = Rotation.Normal) {
@@ -47,11 +39,10 @@ export class UVGenerator {
         ];
         const rot = rotations[rotation];
 
-        this.fixRegion(uvRegion);
-
         const self = this;
         function norm(v: Vector2): Vector2 {
-            v.divide(new Vector2(self._textureWidth, self._textureHeight));
+            v.x /= self._textureWidth;
+            v.y /= self._textureHeight;
             return v;
         }
         
@@ -61,10 +52,10 @@ export class UVGenerator {
     }
 
     addRegion(name: string, x: number, y: number, width: number, height: number, rotation: Rotation = Rotation.Normal) {
-        x *= GridSize;
-        y *= GridSize;
-        width *= GridSize;
-        height *= GridSize;
+        x *= this._gridSize;
+        y *= this._gridSize;
+        width *= this._gridSize;
+        height *= this._gridSize;
 
         x = Math.floor(x);
         y = Math.floor(y);

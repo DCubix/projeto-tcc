@@ -1,6 +1,7 @@
-import { Matrix4, Vector3, Vector4 } from "@math.gl/core";
+import { Matrix4, Vector2, Vector3, Vector4 } from "@math.gl/core";
 import { Light } from "./light";
-import { Mesh } from "./mesh";
+import { Mesh, Vertex } from "./mesh";
+import { AttachmentType, RenderTarget } from "./render_target";
 import { Shader } from "./shader";
 import { Texture2D } from "./texture";
 
@@ -74,7 +75,11 @@ export class Renderer {
     private _viewMatrix: Matrix4;
     private _projectionMatrix: Matrix4;
 
-    private _materialShader: Shader | undefined;
+    private _materialShader?: Shader;
+    private _postfxPalettize?: Shader;
+
+    private _rtScreen: RenderTarget;
+    // private _screenQuad: Mesh;
 
     constructor(canvas: HTMLCanvasElement) {
         this._canvas = canvas;
@@ -97,8 +102,24 @@ export class Renderer {
 
         this._viewMatrix = new Matrix4().identity();
         this._projectionMatrix = new Matrix4().identity();
+
+        this._rtScreen = new RenderTarget(canvas.width, canvas.height, AttachmentType.Color);
         
+        // this._screenQuad = new Mesh();
+        // this._screenQuad.update(
+        //     [
+        //         new Vertex(new Vector3(-1, -1, 0), new Vector3(0, 0, 0), new Vector2(0, 0)),
+        //         new Vertex(new Vector3(1, -1, 0), new Vector3(0, 0, 0), new Vector2(1, 0)),
+        //         new Vertex(new Vector3(1, 1, 0), new Vector3(0, 0, 0), new Vector2(1, 1)),
+        //         new Vertex(new Vector3(-1, 1, 0), new Vector3(0, 0, 0), new Vector2(0, 1))
+        //     ],
+        //     [
+        //         0, 1, 2, 0, 2, 3
+        //     ]
+        // );
+
         this._initMaterialShader();
+        // this._initPostFXPalettizeShader();
     }
 
     public get canvas(): HTMLCanvasElement { return this._canvas; }
@@ -120,8 +141,43 @@ export class Renderer {
         this._projectionMatrix = projectionMatrix;
     }
 
-    public render(backColor: Vector3, ambientColor: Vector3 = new Vector3(0.1, 0.34, 0.7)): void {
+    public render(backColor: Vector3, ambientColor: Vector3 = new Vector3(0, 0, 0)): void {
+        this.drawScene(backColor, ambientColor);
+
+        // this._postfxPalettize!.bind();
+        // this._rtScreen.texture.bind(0);
+
+        // this._postfxPalettize!.setUniformInt("sourceTexture", 0);
+
+        // const gl = Renderer.gl;
+
+        // gl.disable(gl.DEPTH_TEST);
+        // gl.disable(gl.CULL_FACE);
+        // gl.disable(gl.BLEND);
+
+        // gl.viewport(0, 0, this._rtScreen.texture.width, this._rtScreen.texture.height);
+        // gl.clearColor(0, 0, 0, 1);
+
+        // gl.clear(gl.COLOR_BUFFER_BIT);
+
+        // this._screenQuad.bind();
+        // gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
+        // this._screenQuad.unbind();
+        
+        // this._postfxPalettize!.unbind();
+        // this._rtScreen.texture.unbind();
+    }
+
+    private drawScene(backColor: Vector3, ambientColor: Vector3): void {
         const gl = Renderer.gl;
+
+        gl.enable(gl.DEPTH_TEST);
+        gl.enable(gl.CULL_FACE);
+        gl.enable(gl.BLEND);
+
+        // this._rtScreen.bind();
+        //gl.viewport(0, 0, this._canvas.width, this._canvas.height);
+
         gl.clearColor(backColor.x, backColor.y, backColor.z, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
@@ -146,6 +202,8 @@ export class Renderer {
         this._materialShader?.unbind();
         this._renderables = [];
         this._lights = [];
+
+        // this._rtScreen.unbind();
     }
 
     private _initMaterialShader(): void {
@@ -211,15 +269,12 @@ export class Renderer {
             vec4 diffuse = diffuseColor;
             vec3 emission = vec3(0, 0, 0);
 
-            vec2 dx = dFdx(v_uv);
-            vec2 dy = dFdy(v_uv);
-
             if (diffuseIntensity > 0.0) {
-                diffuse *= textureGrad(diffuseTexture, fract(v_uv), dx, dy);
+                diffuse *= texture(diffuseTexture, v_uv);
             }
 
             if (emissionIntensity > 0.0) {
-                emission = textureGrad(emissionTexture, fract(v_uv), dx, dy).rgb;
+                emission = texture(emissionTexture, v_uv).rgb;
             }
 
             // skip lighting if emission luma is equals or greater than 1.0
@@ -267,6 +322,71 @@ export class Renderer {
         `;
 
         this._materialShader = new Shader(vs, fs);
+    }
+
+    private _initPostFXPalettizeShader(): void {
+        const vs = `#version 300 es
+        precision mediump float;
+
+        layout (location=0) in vec3 a_position;
+        layout (location=1) in vec3 a_normal;
+        layout (location=2) in vec2 a_uv;
+
+        out vec2 v_uv;
+
+        void main() {
+            gl_Position = vec4(a_position, 1.0);
+            v_uv = a_uv;
+        }`;
+
+        const fs = `#version 300 es
+        precision mediump float;
+
+        in vec2 v_uv;
+        out vec4 fragColor;
+
+        const vec3 palette[16] = vec3[16](
+            vec3(0.027, 0.027, 0.031),
+            vec3(0.2, 0.133, 0.133),
+            vec3(0.467, 0.267, 0.2),
+            vec3(0.8, 0.533, 0.333),
+            vec3(0.6, 0.2, 0.067),
+            vec3(0.867, 0.467, 0.067),
+            vec3(1.0, 0.867, 0.333),
+            vec3(1.0, 1.0, 0.2),
+            vec3(0.333, 0.667, 0.267),
+            vec3(0.067, 0.333, 0.133),
+            vec3(0.267, 0.933, 0.733),
+            vec3(0.2, 0.533, 0.867),
+            vec3(0.333, 0.267, 0.667),
+            vec3(0.333, 0.333, 0.467),
+            vec3(0.667, 0.733, 0.733),
+            vec3(1.0, 1.0, 1.0)
+        );
+        
+        uniform sampler2D sourceTexture;
+
+        // TODO: dithering
+        vec3 nearestColor(vec3 color) {
+            float minDist = 9.0;
+            vec3 nearestColor = vec3(0.0);
+            for (int i = 0; i < 16; i++) {
+                float dist = distance(color, palette[i]);
+                if (dist < minDist) {
+                    minDist = dist;
+                    nearestColor = palette[i];
+                }
+            }
+            return nearestColor;
+        }
+        
+        void main() {
+            vec4 source = texture(sourceTexture, v_uv);
+            fragColor = vec4(nearestColor(source.rgb), source.a);
+        }
+        `;
+
+        this._postfxPalettize = new Shader(vs, fs);
     }
 
 }

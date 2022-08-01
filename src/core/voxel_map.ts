@@ -212,7 +212,7 @@ export class VoxelMap extends GameObject {
 
     public onCreate(): void {
         // TEST: Generate a terrain
-        this.spriteFaces[1] = [16, 17, 18, 19, 20, 21];
+        this.spriteFaces[1] = [0, 1, 2, 3, 4, 5];
 
         for (let x = 0; x < 32; x++) {
             for (let y = 0; y < 32; y++) {
