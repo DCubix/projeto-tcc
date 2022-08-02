@@ -39,22 +39,6 @@ export class Mesh {
         this._vbo = gl.createBuffer()!;
         this._ibo = gl.createBuffer()!;
         this._vao = gl.createVertexArray()!;
-
-        gl.bindVertexArray(this._vao);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(Vertex.Size() * 4), gl.DYNAMIC_DRAW);
-
-        gl.enableVertexAttribArray(0);
-        gl.enableVertexAttribArray(1);
-        gl.enableVertexAttribArray(2);
-        
-        gl.vertexAttribPointer(0, 3, gl.FLOAT, false, Vertex.Size(), 0);
-        gl.vertexAttribPointer(1, 3, gl.FLOAT, false, Vertex.Size(), 3 * 4);
-        gl.vertexAttribPointer(2, 2, gl.FLOAT, false, Vertex.Size(), (3 + 3) * 4);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ibo);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array([]), gl.DYNAMIC_DRAW);
-        gl.bindVertexArray(null);
     }
 
     public bind(): void {
@@ -73,20 +57,40 @@ export class Mesh {
         const vertData = new Float32Array(vertices.map(v => v.toArray()).flat());
         const idxData = new Uint16Array(indices);
 
-        gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
-        if (this._vertexCount != vertices.length) {
+        if (this._vertexCount <= 0) {
+            gl.bindVertexArray(this._vao);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
             gl.bufferData(gl.ARRAY_BUFFER, vertData, gl.DYNAMIC_DRAW);
-            this._vertexCount = vertices.length;
-        } else {
-            gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertData);
-        }
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ibo);
-        if (this._indexCount != indices.length) {
+            gl.enableVertexAttribArray(0);
+            gl.enableVertexAttribArray(1);
+            gl.enableVertexAttribArray(2);
+            
+            gl.vertexAttribPointer(0, 3, gl.FLOAT, false, Vertex.Size(), 0);
+            gl.vertexAttribPointer(1, 3, gl.FLOAT, false, Vertex.Size(), 12);
+            gl.vertexAttribPointer(2, 2, gl.FLOAT, false, Vertex.Size(), 24);
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ibo);
             gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxData, gl.DYNAMIC_DRAW);
+
+            this._vertexCount = vertices.length;
             this._indexCount = indices.length;
         } else {
-            gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, idxData);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this._vbo);
+            if (this._vertexCount != vertices.length) {
+                gl.bufferData(gl.ARRAY_BUFFER, vertData, gl.DYNAMIC_DRAW);
+                this._vertexCount = vertices.length;
+            } else {
+                gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertData);
+            }
+
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this._ibo);
+            if (this._indexCount != indices.length) {
+                gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxData, gl.DYNAMIC_DRAW);
+                this._indexCount = indices.length;
+            } else {
+                gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, idxData);
+            }
         }
     }
 
@@ -94,6 +98,12 @@ export class Mesh {
         return this._indexCount;
     }
 
+}
+
+export enum Axis {
+    X,
+    Y,
+    Z
 }
 
 export class MeshBuilder {
@@ -112,6 +122,10 @@ export class MeshBuilder {
 
     public addIndex(index: number): void {
         this._indices.push(index);
+    }
+
+    public addIndices(indices: number[], offset: number = 0): void {
+        this._indices.push(...indices.map(i => i + offset));
     }
 
     public addTriangle(a: number, b: number, c: number): void {

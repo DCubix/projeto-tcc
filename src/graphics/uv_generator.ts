@@ -13,26 +13,18 @@ export enum Rotation {
     RotateNegative270
 }
 
-export const GridSize = 4;
-
 export class UVGenerator {
 
     private _uvRegions: { [name: string]: Region };
     private _textureWidth: number;
     private _textureHeight: number;
+    private _gridSize: number;
 
-    constructor(textureWidth: number, textureHeight: number) {
+    constructor(textureWidth: number, textureHeight: number, gridSize: number = 1) {
         this._uvRegions = {};
         this._textureWidth = textureWidth;
         this._textureHeight = textureHeight;
-    }
-
-    private fixRegion(region: Region) {
-        const e = 1e-5;
-        for (let re of region) {
-            re.x -= e;
-            re.y -= e;
-        }
+        this._gridSize = gridSize;
     }
 
     addRawRegion(name: string, uvRegion: Region, rotation: Rotation = Rotation.Normal) {
@@ -47,29 +39,24 @@ export class UVGenerator {
         ];
         const rot = rotations[rotation];
 
-        this.fixRegion(uvRegion);
-
-        const self = this;
-        function norm(v: Vector2): Vector2 {
-            v.divide(new Vector2(self._textureWidth, self._textureHeight));
-            return v;
-        }
-        
         this._uvRegions[name] = [
-            norm(uvRegion[rot[0]]), norm(uvRegion[rot[1]]), norm(uvRegion[rot[2]]), norm(uvRegion[rot[3]])
+            uvRegion[rot[0]],
+            uvRegion[rot[1]],
+            uvRegion[rot[2]],
+            uvRegion[rot[3]]
         ];
     }
 
     addRegion(name: string, x: number, y: number, width: number, height: number, rotation: Rotation = Rotation.Normal) {
-        x *= GridSize;
-        y *= GridSize;
-        width *= GridSize;
-        height *= GridSize;
+        x *= this._gridSize;
+        y *= this._gridSize;
+        width *= this._gridSize;
+        height *= this._gridSize;
 
-        x = Math.floor(x);
-        y = Math.floor(y);
-        width = Math.floor(width);
-        height = Math.floor(height);
+        x = Math.floor(x) / this._textureWidth;
+        y = Math.floor(y) / this._textureHeight;
+        width = Math.floor(width) / this._textureWidth;
+        height = Math.floor(height) / this._textureHeight;
 
         this.addRawRegion(name, [
             new Vector2(x, y),
@@ -80,7 +67,7 @@ export class UVGenerator {
     }
 
     public getRegion(name: string): Region {
-        return this._uvRegions[name];
+        return this._uvRegions[name] || UVGenerator.defaultRegion;
     }
 
     public static get defaultRegion(): Region {
