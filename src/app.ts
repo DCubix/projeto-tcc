@@ -48,7 +48,6 @@ class TestScene extends Scene {
         person.tag = "person";
         person.material = new Material();
         person.material.diffuseTexture = await Util.loadTexture("person.png");
-
         person.addComponent(new Player());
 
         this.add(person);

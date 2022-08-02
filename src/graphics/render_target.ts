@@ -37,7 +37,7 @@ export class RenderTarget {
 
         this._fbo = gl.createFramebuffer()!;
         gl.bindFramebuffer(gl.FRAMEBUFFER, this._fbo);
-        gl.readBuffer(attachment);
+        gl.readBuffer(gl.NONE);
         gl.drawBuffers([attachment]);
         gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, this._texture!.target, this._texture!.id, 0);
         

@@ -83,35 +83,35 @@ export class Person extends GameObject {
     public onCreate(): void {
         const tex = this.material?.diffuseTexture;
         let mb = new MeshBuilder();
-        let uvg = new UVGenerator(tex?.width || 1, tex?.height || 1, 16);
+        let uvg = new UVGenerator(tex?.width || 8, tex?.height || 8, 4);
 
-        uvg.addRegion('head:bottom', 0, 0, 1, 1);
-        uvg.addRegion('head:top', 1, 0, 1, 1);
-        uvg.addRegion('head:left', 0, 1, 1, 1);
-        uvg.addRegion('head:right', 1, 1, 1, 1);
-        uvg.addRegion('head:front', 2, 1, 1, 1);
-        uvg.addRegion('head:back', 3, 1, 1, 1);
+        uvg.addRegion('head:bottom', 0, 0, 4, 4);
+        uvg.addRegion('head:top', 4, 0, 4, 4);
+        uvg.addRegion('head:left', 0, 4, 4, 4);
+        uvg.addRegion('head:right', 8, 4, 4, 4);
+        uvg.addRegion('head:front', 4, 4, 4, 4);
+        uvg.addRegion('head:back', 12, 4, 4, 4);
 
-        uvg.addRegion('torso:top', 21, 10, 5, 3);
-        uvg.addRegion('torso:bottom', 16, 10, 5, 3);
-        uvg.addRegion('torso:left', 8, 10, 3, 5);
-        uvg.addRegion('torso:right', 0, 10, 3, 5);
-        uvg.addRegion('torso:front', 3, 10, 5, 5);
-        uvg.addRegion('torso:back', 11, 10, 5, 5);
+        uvg.addRegion('torso:top', 0, 8, 4, 3);
+        uvg.addRegion('torso:bottom', 4, 8, 4, 3);
+        uvg.addRegion('torso:left', 0, 11, 4, 5);
+        uvg.addRegion('torso:right', 7, 11, 3, 5);
+        uvg.addRegion('torso:front', 3, 11, 4, 5);
+        uvg.addRegion('torso:back', 10, 11, 4, 5);
 
-        uvg.addRegion('leg:top', 28, 0, 2, 2);
-        uvg.addRegion('leg:bottom', 28, 2, 2, 2);
-        uvg.addRegion('leg:left', 20, 0, 2, 5, Rotation.Rotate180);
-        uvg.addRegion('leg:front', 22, 0, 2, 5, Rotation.Rotate180);
-        uvg.addRegion('leg:right', 24, 0, 2, 5, Rotation.Rotate180);
-        uvg.addRegion('leg:back', 26, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('leg:top', 8, 18, 2, 2);
+        uvg.addRegion('leg:bottom', 8, 16, 2, 2);
+        uvg.addRegion('leg:left', 0, 16, 2, 4, Rotation.Rotate180);
+        uvg.addRegion('leg:front', 2, 16, 2, 4, Rotation.Rotate180);
+        uvg.addRegion('leg:right', 4, 16, 2, 4, Rotation.Rotate180);
+        uvg.addRegion('leg:back', 6, 16, 2, 4, Rotation.Rotate180);
 
-        uvg.addRegion('arm:top', 18, 0, 2, 2);
-        uvg.addRegion('arm:bottom', 18, 2, 2, 2);
-        uvg.addRegion('arm:left', 10, 0, 2, 5, Rotation.Rotate180);
-        uvg.addRegion('arm:front', 12, 0, 2, 5, Rotation.Rotate180);
-        uvg.addRegion('arm:right', 14, 0, 2, 5, Rotation.Rotate180);
-        uvg.addRegion('arm:back', 16, 0, 2, 5, Rotation.Rotate180);
+        uvg.addRegion('arm:top', 18, 18, 2, 2);
+        uvg.addRegion('arm:bottom', 18, 16, 2, 2);
+        uvg.addRegion('arm:left', 10, 16, 2, 4, Rotation.Rotate180);
+        uvg.addRegion('arm:front', 12, 16, 2, 4, Rotation.Rotate180);
+        uvg.addRegion('arm:right', 14, 16, 2, 4, Rotation.Rotate180);
+        uvg.addRegion('arm:back', 16, 16, 2, 4, Rotation.Rotate180);
         
         const pixel = 1.0 / 60;
         const unit = pixel * 4;

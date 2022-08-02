@@ -52,13 +52,13 @@ class Renderable {
             shader.setUniformFloat("diffuseIntensity", 0);
         }
 
-        if (this.material.hasEmissionTexture) {
-            shader.setUniformInt("emissionTexture", 1);
-            shader.setUniformFloat("emissionIntensity", this.material.emissionIntensity);
-            this.material.emissionTexture!.bind(1);
-        } else {
-            shader.setUniformFloat("emissionIntensity", 0);
-        }
+        // if (this.material.hasEmissionTexture) {
+        //     shader.setUniformInt("emissionTexture", 1);
+        //     shader.setUniformFloat("emissionIntensity", this.material.emissionIntensity);
+        //     this.material.emissionTexture!.bind(1);
+        // } else {
+        //     shader.setUniformFloat("emissionIntensity", 0);
+        // }
     }
 }
 
@@ -78,7 +78,7 @@ export class Renderer {
     private _materialShader?: Shader;
     private _postfxPalettize?: Shader;
 
-    private _rtScreen: RenderTarget;
+    private _rtScreen?: RenderTarget;
     // private _screenQuad: Mesh;
 
     constructor(canvas: HTMLCanvasElement) {
@@ -103,7 +103,7 @@ export class Renderer {
         this._viewMatrix = new Matrix4().identity();
         this._projectionMatrix = new Matrix4().identity();
 
-        this._rtScreen = new RenderTarget(canvas.width, canvas.height, AttachmentType.Color);
+        // this._rtScreen = new RenderTarget(canvas.width, canvas.height, AttachmentType.Color);
         
         // this._screenQuad = new Mesh();
         // this._screenQuad.update(
@@ -171,12 +171,14 @@ export class Renderer {
     private drawScene(backColor: Vector3, ambientColor: Vector3): void {
         const gl = Renderer.gl;
 
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
         gl.enable(gl.DEPTH_TEST);
         gl.enable(gl.CULL_FACE);
         gl.enable(gl.BLEND);
 
         // this._rtScreen.bind();
-        //gl.viewport(0, 0, this._canvas.width, this._canvas.height);
+        gl.viewport(0, 0, this._canvas.width, this._canvas.height);
 
         gl.clearColor(backColor.x, backColor.y, backColor.z, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -186,11 +188,11 @@ export class Renderer {
         this._materialShader?.setUniform("viewMatrix", this._viewMatrix);
         this._materialShader?.setUniform("projectionMatrix", this._projectionMatrix);
 
-        this._materialShader?.setUniform("ambientColor", ambientColor);
-        for (const light of this._lights) {
-            light.applyToShader(this._lights.indexOf(light), this._materialShader!);
-        }
-        this._materialShader?.setUniformInt("numLights", this._lights.length);
+        // this._materialShader?.setUniform("ambientColor", ambientColor);
+        // for (const light of this._lights) {
+        //     light.applyToShader(this._lights.indexOf(light), this._materialShader!);
+        // }
+        // this._materialShader?.setUniformInt("numLights", this._lights.length);
 
         for (const ren of this._renderables) {
             ren.applyToShader(this._materialShader!);
@@ -267,57 +269,58 @@ export class Renderer {
 
         void main() {
             vec4 diffuse = diffuseColor;
-            vec3 emission = vec3(0, 0, 0);
+            // vec3 emission = vec3(0, 0, 0);
 
             if (diffuseIntensity > 0.0) {
                 diffuse *= texture(diffuseTexture, v_uv);
             }
 
-            if (emissionIntensity > 0.0) {
-                emission = texture(emissionTexture, v_uv).rgb;
-            }
+            // if (emissionIntensity > 0.0) {
+            //     emission = texture(emissionTexture, v_uv).rgb;
+            // }
 
-            // skip lighting if emission luma is equals or greater than 1.0
-            if (dot(emission, vec3(0.2126, 0.7152, 0.0722)) >= 1.0) {
-                fragColor = diffuse;
-                return;
-            }
+            // // skip lighting if emission luma is equals or greater than 1.0
+            // if (dot(emission, vec3(0.2126, 0.7152, 0.0722)) >= 1.0) {
+            //     fragColor = diffuse;
+            //     return;
+            // }
 
-            vec3 N = normalize(v_normal);
+            // vec3 N = normalize(v_normal);
 
-            vec3 lighting = ambientColor;
-            for (int i = 0; i < numLights; i++) {
-                Light light = lights[i];
-                if (light.intensity <= 0.0) {
-                    continue;
-                }
+            // vec3 lighting = ambientColor;
+            // for (int i = 0; i < numLights; i++) {
+            //     Light light = lights[i];
+            //     if (light.intensity <= 0.0) {
+            //         continue;
+            //     }
 
-                vec3 L = vec3(0.0);
-                float att = 1.0;
-                vec3 Lp = light.position;
+            //     vec3 L = vec3(0.0);
+            //     float att = 1.0;
+            //     vec3 Lp = light.position;
 
-                if (light.type == 0) {
-                    L = normalize(-light.position);
-                } else if (light.type == 1) {
-                    L = light.position - v_position;
-                    float dist = length(L);
-                    L = normalize(L);
+            //     if (light.type == 0) {
+            //         L = normalize(-light.position);
+            //     } else if (light.type == 1) {
+            //         L = light.position - v_position;
+            //         float dist = length(L);
+            //         L = normalize(L);
 
-                    if (dist < light.radius) {
-                        att = sqr2(clamp(1.0 - dist / light.radius, 0.0, 1.0));
-                    } else {
-                        att = 0.0;
-                    }
-                }
+            //         if (dist < light.radius) {
+            //             att = sqr2(clamp(1.0 - dist / light.radius, 0.0, 1.0));
+            //         } else {
+            //             att = 0.0;
+            //         }
+            //     }
 
-                float NoL = max(dot(N, L), 0.0);
-                if (att > 0.0) {
-                    float fact = NoL * att;
-                    lighting += light.color * light.intensity * fact;
-                }
-            }
+            //     float NoL = max(dot(N, L), 0.0);
+            //     if (att > 0.0) {
+            //         float fact = NoL * att;
+            //         lighting += light.color * light.intensity * fact;
+            //     }
+            // }
 
-            fragColor = (diffuse * vec4(lighting, 1.0)) + vec4(emission, 0.0);
+            // fragColor = (diffuse * vec4(lighting, 1.0)) + vec4(emission, 0.0);
+            fragColor = vec4(diffuse.rgb, 1.0);
         }
         `;
 

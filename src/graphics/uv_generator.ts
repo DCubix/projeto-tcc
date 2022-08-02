@@ -39,15 +39,11 @@ export class UVGenerator {
         ];
         const rot = rotations[rotation];
 
-        const self = this;
-        function norm(v: Vector2): Vector2 {
-            v.x /= self._textureWidth;
-            v.y /= self._textureHeight;
-            return v;
-        }
-        
         this._uvRegions[name] = [
-            norm(uvRegion[rot[0]]), norm(uvRegion[rot[1]]), norm(uvRegion[rot[2]]), norm(uvRegion[rot[3]])
+            uvRegion[rot[0]],
+            uvRegion[rot[1]],
+            uvRegion[rot[2]],
+            uvRegion[rot[3]]
         ];
     }
 
@@ -57,10 +53,10 @@ export class UVGenerator {
         width *= this._gridSize;
         height *= this._gridSize;
 
-        x = Math.floor(x);
-        y = Math.floor(y);
-        width = Math.floor(width);
-        height = Math.floor(height);
+        x = Math.floor(x) / this._textureWidth;
+        y = Math.floor(y) / this._textureHeight;
+        width = Math.floor(width) / this._textureWidth;
+        height = Math.floor(height) / this._textureHeight;
 
         this.addRawRegion(name, [
             new Vector2(x, y),
@@ -71,7 +67,7 @@ export class UVGenerator {
     }
 
     public getRegion(name: string): Region {
-        return this._uvRegions[name];
+        return this._uvRegions[name] || UVGenerator.defaultRegion;
     }
 
     public static get defaultRegion(): Region {
