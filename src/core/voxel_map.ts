@@ -206,7 +206,7 @@ export class VoxelMap extends GameObject {
             }
         }
 
-        const [vertices, indices] = mb.recalculateNormals().buildData();
+        const [vertices, indices] = mb.buildData();
         this._mesh.update(vertices, indices);
     }
 

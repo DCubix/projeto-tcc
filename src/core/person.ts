@@ -185,7 +185,7 @@ export class Person extends GameObject {
             uvg.getRegion('torso:back')
         );
 
-        const [verts, inds] = mb.recalculateNormals().buildData();
+        const [verts, inds] = mb.buildData();
         this._mesh.update(verts, inds);
         
         this._vertices = verts;

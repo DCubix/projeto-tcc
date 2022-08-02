@@ -4,17 +4,19 @@ export class TextureTypeSpec {
     public readonly internalFormat: number;
     public readonly format: number;
     public readonly type: number;
+    public readonly mips: boolean;
 
-    constructor(internalFormat: number, format: number, type: number) {
+    constructor(internalFormat: number, format: number, type: number, mips: boolean) {
         this.internalFormat = internalFormat;
         this.format = format;
         this.type = type;
+        this.mips = mips;
     }
 }
 
 export const TextureType = {
-    ColorTexture: new TextureTypeSpec(WebGL2RenderingContext.RGBA, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE),
-    DepthTexture: new TextureTypeSpec(WebGL2RenderingContext.DEPTH_COMPONENT, WebGL2RenderingContext.DEPTH_COMPONENT, WebGL2RenderingContext.UNSIGNED_SHORT),
+    ColorTexture: new TextureTypeSpec(WebGL2RenderingContext.RGBA8, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, true),
+    DepthTexture: new TextureTypeSpec(WebGL2RenderingContext.DEPTH_COMPONENT16, WebGL2RenderingContext.DEPTH_COMPONENT, WebGL2RenderingContext.UNSIGNED_SHORT, false),
 } as const;
 
 export abstract class TextureBase {
@@ -52,9 +54,14 @@ export class Texture2D extends TextureBase {
         gl.texImage2D(this._target, 0, type.internalFormat, this._width, this._width, 0, type.format, type.type, null);
 
         // mipmaps
-        gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-        gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-        gl.generateMipmap(this._target);
+        if (type.mips) {
+            gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+            gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            gl.generateMipmap(this._target);
+        } else {
+            gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        }
         
         gl.texParameteri(this._target, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(this._target, gl.TEXTURE_WRAP_T, gl.REPEAT);

@@ -2,56 +2,80 @@ import { Renderer } from "./renderer";
 import { Texture2D, TextureType } from "./texture";
 
 export enum AttachmentType {
-    Color = 0,
-    Depth
+    Color0 = WebGL2RenderingContext.COLOR_ATTACHMENT0,
+    Color1 = WebGL2RenderingContext.COLOR_ATTACHMENT1,
+    Color2 = WebGL2RenderingContext.COLOR_ATTACHMENT2,
+    Color3 = WebGL2RenderingContext.COLOR_ATTACHMENT3,
+    Color4 = WebGL2RenderingContext.COLOR_ATTACHMENT4,
+    Depth = WebGL2RenderingContext.DEPTH_ATTACHMENT
 }
 
 export class RenderTarget {
 
-    private _texture?: Texture2D;
+    private _textures: { [type: number]: Texture2D };
+    private _drawBuffers: number[] = [];
+
     private _fbo?: WebGLFramebuffer;
 
     private _readOnly: boolean = false;
 
-    constructor(width: number, height: number, type: AttachmentType) {
-        let textureType = null;
-        switch (type) {
-            case AttachmentType.Color: textureType = TextureType.ColorTexture; break;
-            case AttachmentType.Depth: textureType = TextureType.DepthTexture; break;
-        }
+    private _width: number;
+    private _height: number;
 
-        this._texture = new Texture2D(width, height, textureType);
-        this.initialize(type);
+    public get width(): number { return this._width; }
+    public get height(): number { return this._height; }
+
+    constructor(width: number, height: number) {
+        this._textures = {};
+        this._width = width;
+        this._height = height;
+
+        this.initialize();
     }
 
-    public get texture(): Texture2D { return this._texture!; }
-
-    protected initialize(type: AttachmentType) {
+    public add(type: AttachmentType): RenderTarget {
         const gl = Renderer.gl;
 
-        let attachment = 0;
-        switch (type) {
-            case AttachmentType.Color: attachment = gl.COLOR_ATTACHMENT0; break;
-            case AttachmentType.Depth: attachment = gl.DEPTH_ATTACHMENT; break;
+        const textureType = type == AttachmentType.Depth ? TextureType.DepthTexture : TextureType.ColorTexture;
+        const texture = new Texture2D(this._width, this._height, textureType);
+        
+        this._textures[type] = texture;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._fbo!);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, type, gl.TEXTURE_2D, texture.id, 0);
+
+        if (type !== AttachmentType.Depth) {
+            this._drawBuffers.push(type);
+            gl.drawBuffers(this._drawBuffers);
         }
 
-        this._fbo = gl.createFramebuffer()!;
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this._fbo);
-        gl.readBuffer(gl.NONE);
-        gl.drawBuffers([attachment]);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, this._texture!.target, this._texture!.id, 0);
-        
         if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
             throw new Error("Framebuffer is not complete");
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        return this;
     }
 
-    public bind(readOnly: boolean = false) {
+    public texture(attachment: AttachmentType): Texture2D { return this._textures[attachment]; }
+
+    protected initialize() {
+        const gl = Renderer.gl;
+
+        this._fbo = gl.createFramebuffer()!;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._fbo);
+        gl.readBuffer(gl.NONE);
+        gl.drawBuffers([gl.NONE]);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    public bind(readOnly: boolean = false, readBuffer?: AttachmentType) {
         this._readOnly = readOnly;
         const gl = Renderer.gl;
         gl.bindFramebuffer(readOnly ? gl.READ_FRAMEBUFFER : gl.FRAMEBUFFER, this._fbo!);
+        if (readBuffer) gl.readBuffer(readBuffer);
+        else gl.readBuffer(gl.NONE);
     }
 
     public unbind() {

@@ -269,27 +269,26 @@ export class MeshBuilder {
     }
 
     public recalculateNormals(): MeshBuilder {
-        const normals: Vector3[] = [];
         for (let i = 0; i < this._vertices.length; i++) {
-            normals.push(new Vector3(0, 0, 0));
+            this._vertices[i].normal.set(0, 0, 0);
         }
 
         for (let i = 0; i < this._indices.length; i += 3) {
-            const a = this._indices[i];
-            const b = this._indices[i + 1];
-            const c = this._indices[i + 2];
+            const v1 = this._indices[i];
+            const v2 = this._indices[i + 1];
+            const v3 = this._indices[i + 2];
 
-            const v1 = this._vertices[b].position.clone().subtract(this._vertices[a].position);
-            const v2 = this._vertices[c].position.clone().subtract(this._vertices[a].position);
-            const normal = v1.cross(v2).normalize();
+            const e1 = this._vertices[v2].position.clone().subtract(this._vertices[v1].position);
+            const e2 = this._vertices[v3].position.clone().subtract(this._vertices[v1].position);
+            const normal = e1.clone().cross(e2);
 
-            normals[a].add(normal);
-            normals[b].add(normal);
-            normals[c].add(normal);
+            this._vertices[v1].normal.add(normal);
+            this._vertices[v2].normal.add(normal);
+            this._vertices[v3].normal.add(normal);
         }
 
         for (let i = 0; i < this._vertices.length; i++) {
-            this._vertices[i].normal = normals[i].normalize();
+            this._vertices[i].normal.normalize();
         }
 
         return this;
