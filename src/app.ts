@@ -82,15 +82,15 @@ class TestScene extends Scene {
         // this.add(light);
 
         for (let i = 0; i < 12; i++) {
-            const light = new PointLight(1.0, 15.0);
+            const light = new PointLight(1.0, 10.0);
             light.localPosition.set(
                 Math.floor(i / 4) * 4.0,
                 0.5,
                 Math.floor(i % 4) * 4.0
             );
             light.color = hsvToRgb(
+                Math.random(),
                 1.0,
-                0.0,
                 1.0
             );
             light.tag = "light";
@@ -99,6 +99,8 @@ class TestScene extends Scene {
         
 
         // light.setParent(person);
+
+        this.ambientColor = new Vector3(0.1, 0.11, 0.12);
     }
 
     public onUpdate(deltaTime: number): void {

@@ -48,6 +48,7 @@ export abstract class Scene {
     }
 
     public render(renderer: Renderer): void {
+        renderer.ambientColor.set(this.ambientColor.x, this.ambientColor.y, this.ambientColor.z);
         for (let ob of this._gameObjects) {
             ob.onRender(renderer);
         }

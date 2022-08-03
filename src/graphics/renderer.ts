@@ -2,7 +2,9 @@ import { Matrix4, Vector3 } from "@math.gl/core";
 import { Light } from "./light";
 import { Mesh } from "./mesh";
 import { RenderPass } from "./pass";
+import { FinalPass } from "./passes/final_pass";
 import { GBufferPass } from "./passes/gbuffer_pass";
+import { LightingPass } from "./passes/lighting_pass";
 import { Shader } from "./shader";
 import { Texture2D } from "./texture";
 
@@ -76,11 +78,15 @@ export class Renderer {
     private _viewMatrix: Matrix4;
     private _projectionMatrix: Matrix4;
 
-    private _passes: RenderPass[] = [];
+    private _passes: { [key: string]: RenderPass } = {};
+
+    public ambientColor: Vector3 = new Vector3(0, 0, 0);
 
     public get viewMatrix(): Matrix4 { return this._viewMatrix; }
     public get projectionMatrix(): Matrix4 { return this._projectionMatrix; }
+
     public get renderables(): Renderable[] { return this._renderables; }
+    public get lights(): Light[] { return this._lights; }
 
     constructor(canvas: HTMLCanvasElement) {
         this._canvas = canvas;
@@ -114,7 +120,9 @@ export class Renderer {
         this._viewMatrix = new Matrix4().identity();
         this._projectionMatrix = new Matrix4().identity();
 
-        this._passes.push(new GBufferPass(this.canvas.width/2, this.canvas.height/2));
+        this.addPass("gbuffer", new GBufferPass(this.canvas.width/2, this.canvas.height/2));
+        this.addPass("lighting", new LightingPass(this.canvas.width/2, this.canvas.height/2));
+        this.addPass("final", new FinalPass());
     }
 
     public get canvas(): HTMLCanvasElement { return this._canvas; }
@@ -136,8 +144,16 @@ export class Renderer {
         this._projectionMatrix = projectionMatrix;
     }
 
-    public render(backColor: Vector3, ambientColor: Vector3 = new Vector3(0, 0, 0)): void {
-        for (const pass of this._passes) {
+    public addPass(name: string, pass: RenderPass): void {
+        this._passes[name] = pass;
+    }
+
+    public getPass(name: string): RenderPass | undefined {
+        return this._passes[name];
+    }
+
+    public render(): void {
+        for (const pass of Object.values(this._passes)) {
             pass.render(this);
         }
     }

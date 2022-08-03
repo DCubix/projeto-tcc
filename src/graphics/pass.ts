@@ -34,6 +34,9 @@ export abstract class RenderPass {
         for (const capability of this._disabled) {
             gl.enable(capability);
         }
+
+        this._disabled.length = 0;
+        this._enabled.length = 0;
     }
 
     public abstract render(renderer: Renderer): void;

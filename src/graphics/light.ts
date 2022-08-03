@@ -21,8 +21,7 @@ export class Light {
         this.type = type;
     }
 
-    public applyToShader(index: number, shader: Shader) {
-        const name = `lights[${index}]`;
+    public applyToShader(name: string, shader: Shader) {
         shader.setUniform(`${name}.position`, this.position);
         shader.setUniform(`${name}.color`, this.color);
         shader.setUniformFloat(`${name}.intensity`, this.intensity);

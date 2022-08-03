@@ -13,6 +13,10 @@ export class GBufferPass extends RenderPass {
     private _target: RenderTarget;
     private _shader: Shader;
 
+    public get target(): RenderTarget {
+        return this._target;
+    }
+
     public constructor(width: number, height: number) {
         super();
         this._target = new RenderTarget(width, height)
@@ -25,7 +29,7 @@ export class GBufferPass extends RenderPass {
         this._shader = new Shader(gbuffer_vert, gbuffer_frag);
     }
 
-    public render(renderer: Renderer): void {
+    public render(renderer: Renderer, previousPass?: RenderPass): void {
         const gl = Renderer.gl;
 
         // we need depth testing, culling, and blending
