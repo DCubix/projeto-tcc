@@ -1,19 +1,10 @@
 import { Renderer } from "./renderer";
-import { Texture2D, TextureType } from "./texture";
-
-export enum AttachmentType {
-    Color0 = WebGL2RenderingContext.COLOR_ATTACHMENT0,
-    Color1 = WebGL2RenderingContext.COLOR_ATTACHMENT1,
-    Color2 = WebGL2RenderingContext.COLOR_ATTACHMENT2,
-    Color3 = WebGL2RenderingContext.COLOR_ATTACHMENT3,
-    Color4 = WebGL2RenderingContext.COLOR_ATTACHMENT4,
-    Depth = WebGL2RenderingContext.DEPTH_ATTACHMENT
-}
+import { Texture2D, TextureFormat, TextureType } from "./texture";
 
 export class RenderTarget {
 
-    private _textures: { [type: number]: Texture2D };
-    private _drawBuffers: number[] = [];
+    private _colorAttachments: Texture2D[] = [];
+    private _depthAttachment?: Texture2D;
 
     private _fbo?: WebGLFramebuffer;
 
@@ -26,31 +17,52 @@ export class RenderTarget {
     public get height(): number { return this._height; }
 
     constructor(width: number, height: number) {
-        this._textures = {};
         this._width = width;
         this._height = height;
 
         this.initialize();
     }
 
-    public add(type: AttachmentType): RenderTarget {
-        const gl = Renderer.gl;
+    public addColor(format: TextureFormat): RenderTarget {
+        const textureType = TextureType[format];
+        const texture = new Texture2D(this._width, this._height, textureType)
+            .setRepeat();
 
-        const textureType = type == AttachmentType.Depth ? TextureType.DepthTexture : TextureType.ColorTexture;
-        const texture = new Texture2D(this._width, this._height, textureType);
-        
-        this._textures[type] = texture;
-
-        gl.bindFramebuffer(gl.FRAMEBUFFER, this._fbo!);
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, type, gl.TEXTURE_2D, texture.id, 0);
-
-        if (type !== AttachmentType.Depth) {
-            this._drawBuffers.push(type);
-            gl.drawBuffers(this._drawBuffers);
+        if (format < 4) {
+            texture.generateMipmap();
         }
 
-        if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) {
-            throw new Error("Framebuffer is not complete");
+        this._colorAttachments.push(texture);
+        return this;
+    }
+
+    public addDepth(): RenderTarget {
+        const texture = new Texture2D(this._width, this._height, TextureType[TextureFormat.Depth]);
+        this._depthAttachment = texture;
+        return this;
+    }
+
+    public build(): RenderTarget {
+        const gl = Renderer.gl;
+
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this._fbo!);
+
+        const drawBuffers = this._colorAttachments.map((_, i) => gl.COLOR_ATTACHMENT0 + i);
+        gl.drawBuffers(drawBuffers);
+
+        let i = 0;
+        for (let tex of this._colorAttachments) {
+            const attachment = gl.COLOR_ATTACHMENT0 + (i++);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, attachment, gl.TEXTURE_2D, tex.id, 0);
+        }
+
+        if (this._depthAttachment) {
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.TEXTURE_2D, this._depthAttachment.id, 0);
+        }
+
+        const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            this._check(status);
         }
 
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
@@ -58,7 +70,8 @@ export class RenderTarget {
         return this;
     }
 
-    public texture(attachment: AttachmentType): Texture2D { return this._textures[attachment]; }
+    public color(attachment: number): Texture2D { return this._colorAttachments[attachment]; }
+    public depth(): Texture2D | undefined { return this._depthAttachment; }
 
     protected initialize() {
         const gl = Renderer.gl;
@@ -70,17 +83,29 @@ export class RenderTarget {
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
-    public bind(readOnly: boolean = false, readBuffer?: AttachmentType) {
+    public bind(readOnly: boolean = false, readBuffer: number = -1) {
         this._readOnly = readOnly;
         const gl = Renderer.gl;
         gl.bindFramebuffer(readOnly ? gl.READ_FRAMEBUFFER : gl.FRAMEBUFFER, this._fbo!);
-        if (readBuffer) gl.readBuffer(readBuffer);
+        if (readBuffer >= 0) gl.readBuffer(gl.COLOR_ATTACHMENT0 + readBuffer);
         else gl.readBuffer(gl.NONE);
     }
 
     public unbind() {
         const gl = Renderer.gl;
         gl.bindFramebuffer(this._readOnly ? gl.READ_FRAMEBUFFER : gl.FRAMEBUFFER, null);
+    }
+
+    private _check(status: number) {
+        const gl = Renderer.gl;
+        switch (status) {
+            case gl.FRAMEBUFFER_COMPLETE: return;
+            case gl.FRAMEBUFFER_INCOMPLETE_ATTACHMENT: throw new Error("Incomplete attachment");
+            case gl.FRAMEBUFFER_INCOMPLETE_MISSING_ATTACHMENT: throw new Error("Missing attachment");
+            case gl.FRAMEBUFFER_INCOMPLETE_DIMENSIONS: throw new Error("Incomlpete dimensions");
+            case gl.FRAMEBUFFER_UNSUPPORTED: throw new Error("Unsupported");
+            default: throw new Error("Unknown error");
+        }
     }
 
 }

@@ -81,16 +81,16 @@ class TestScene extends Scene {
         // light.fromToRotation(light.localPosition, new Vector3(0, 0, 0));
         // this.add(light);
 
-        for (let i = 0; i < 5; i++) {
-            const light = new PointLight(1.7, 10.0);
+        for (let i = 0; i < 12; i++) {
+            const light = new PointLight(1.0, 15.0);
             light.localPosition.set(
-                Math.random() * 10.0,
+                Math.floor(i / 4) * 4.0,
                 0.5,
-                Math.random() * 10.0
+                Math.floor(i % 4) * 4.0
             );
             light.color = hsvToRgb(
-                Math.random(),
                 1.0,
+                0.0,
                 1.0
             );
             light.tag = "light";

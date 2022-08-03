@@ -1,4 +1,4 @@
-import { Texture2D, TextureType } from "../graphics/texture";
+import { Texture2D, TextureFormat, TextureType } from "../graphics/texture";
 
 export class Util {
 
@@ -13,7 +13,7 @@ export class Util {
                 const context = canvas.getContext("2d")!;
                 context.drawImage(image, 0, 0);
 
-                const texture = new Texture2D(image.width, image.height, TextureType.ColorTexture);
+                const texture = new Texture2D(image.width, image.height, TextureType[TextureFormat.Rgba8]);
                 texture.update(context.getImageData(0, 0, image.width, image.height).data);
 
                 resolve(texture);

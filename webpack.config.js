@@ -19,6 +19,10 @@ module.exports = {
       { 
         test: /\.tsx?$/,
         loader: "ts-loader"
+      },
+      {
+        test: /\.(glsl|vs|fs)$/,
+        loader: 'ts-shader-loader'
       }
     ]
   }

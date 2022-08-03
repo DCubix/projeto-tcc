@@ -98,6 +98,20 @@ export class Mesh {
         return this._indexCount;
     }
 
+    private static _defaultQuad?: Mesh;
+    public static get defaultQuad(): Mesh {
+        if (Mesh._defaultQuad == null) {
+            Mesh._defaultQuad = new Mesh();
+            Mesh._defaultQuad.update([
+                new Vertex(new Vector3(-1, -1, 0), new Vector3(0, 0, 1), new Vector2(0, 0)),
+                new Vertex(new Vector3(1, -1, 0), new Vector3(0, 0, 1), new Vector2(1, 0)),
+                new Vertex(new Vector3(1, 1, 0), new Vector3(0, 0, 1), new Vector2(1, 1)),
+                new Vertex(new Vector3(-1, 1, 0), new Vector3(0, 0, 1), new Vector2(0, 1)),
+            ], [0, 1, 2, 0, 2, 3]);
+        }
+        return Mesh._defaultQuad;
+    }
+
 }
 
 export enum Axis {

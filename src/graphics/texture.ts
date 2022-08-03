@@ -1,23 +1,38 @@
 import { Renderer } from "./renderer";
 
+export enum TextureFormat {
+    SingleComponent = 0,
+    Rg8,
+    Rgb8,
+    Rgba8,
+    RgF,
+    RgbF,
+    RgbaF,
+    Depth
+}
+
 export class TextureTypeSpec {
     public readonly internalFormat: number;
     public readonly format: number;
     public readonly type: number;
-    public readonly mips: boolean;
 
-    constructor(internalFormat: number, format: number, type: number, mips: boolean) {
+    constructor(internalFormat: number, format: number, type: number) {
         this.internalFormat = internalFormat;
         this.format = format;
         this.type = type;
-        this.mips = mips;
     }
 }
 
-export const TextureType = {
-    ColorTexture: new TextureTypeSpec(WebGL2RenderingContext.RGBA8, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE, true),
-    DepthTexture: new TextureTypeSpec(WebGL2RenderingContext.DEPTH_COMPONENT16, WebGL2RenderingContext.DEPTH_COMPONENT, WebGL2RenderingContext.UNSIGNED_SHORT, false),
-} as const;
+export const TextureType = [
+    new TextureTypeSpec(WebGL2RenderingContext.R8, WebGL2RenderingContext.RED, WebGL2RenderingContext.UNSIGNED_BYTE), // SingleComponent
+    new TextureTypeSpec(WebGL2RenderingContext.RG8, WebGL2RenderingContext.RG, WebGL2RenderingContext.UNSIGNED_BYTE), // Rg8
+    new TextureTypeSpec(WebGL2RenderingContext.RGB8, WebGL2RenderingContext.RGB, WebGL2RenderingContext.UNSIGNED_BYTE), // Rgb8
+    new TextureTypeSpec(WebGL2RenderingContext.RGBA8, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.UNSIGNED_BYTE), // Rgba8
+    new TextureTypeSpec(WebGL2RenderingContext.RG16F, WebGL2RenderingContext.RG, WebGL2RenderingContext.HALF_FLOAT), // RgF
+    new TextureTypeSpec(WebGL2RenderingContext.RGB16F, WebGL2RenderingContext.RGB, WebGL2RenderingContext.HALF_FLOAT), // RgbF
+    new TextureTypeSpec(WebGL2RenderingContext.RGBA16F, WebGL2RenderingContext.RGBA, WebGL2RenderingContext.HALF_FLOAT), // RgbaF
+    new TextureTypeSpec(WebGL2RenderingContext.DEPTH_COMPONENT16, WebGL2RenderingContext.DEPTH_COMPONENT, WebGL2RenderingContext.UNSIGNED_SHORT) // Depth
+] as const;
 
 export abstract class TextureBase {
 
@@ -51,25 +66,41 @@ export class Texture2D extends TextureBase {
 
         this._id = gl.createTexture()!;
         gl.bindTexture(this._target, this._id);
-        gl.texImage2D(this._target, 0, type.internalFormat, this._width, this._width, 0, type.format, type.type, null);
-
-        // mipmaps
-        if (type.mips) {
-            gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
-            gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            gl.generateMipmap(this._target);
-        } else {
-            gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-            gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-        }
         
-        gl.texParameteri(this._target, gl.TEXTURE_WRAP_S, gl.REPEAT);
-        gl.texParameteri(this._target, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        // gl.texImage2D(this._target, 0, type.internalFormat, this._width, this._width, 0, type.format, type.type, null);
+        
+        gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        
+        gl.texParameteri(this._target, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(this._target, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        
+        gl.texStorage2D(this._target, 1, type.internalFormat, width, height);
+        
         gl.bindTexture(this._target, null);
     }
 
     public get width(): number { return this._width; }
     public get height(): number { return this._height; }
+
+    public generateMipmap(): Texture2D {
+        const gl = Renderer.gl;
+        gl.bindTexture(this._target, this._id);
+        gl.texParameteri(this._target, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_LINEAR);
+        gl.texParameteri(this._target, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.generateMipmap(this._target);
+        gl.bindTexture(this._target, null);
+        return this;
+    }
+
+    public setRepeat(): Texture2D {
+        const gl = Renderer.gl;
+        gl.bindTexture(this._target, this._id);
+        gl.texParameteri(this._target, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(this._target, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        gl.bindTexture(this._target, null);
+        return this;
+    }
 
     public bind(unit: number): void {
         const gl = Renderer.gl;
@@ -101,7 +132,7 @@ export class Texture2D extends TextureBase {
     private static _default: Texture2D;
     public static get default(): Texture2D {
         if (Texture2D._default == null) {
-            Texture2D._default = new Texture2D(1, 1, TextureType.ColorTexture);
+            Texture2D._default = new Texture2D(1, 1, TextureType[TextureFormat.Rgba8]).setRepeat();
             Texture2D._default.update(new Uint8Array([255, 255, 255, 255]));
         }
         return Texture2D._default;
