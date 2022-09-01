@@ -268,7 +268,7 @@ export class VoxelMap extends GameObject {
                         block.verticalSpriteCount = 8;
                         block.material = this.material;
 
-                        block.localPosition.set(x + 0.5, (z + 1) + 0.5, y + 0.5);
+                        block.localPosition.set(x + 0.5, z + 0.5, y + 0.5);
                         
                         scene.add(block);
                     } break;

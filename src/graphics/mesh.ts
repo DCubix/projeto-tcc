@@ -337,8 +337,11 @@ export class MeshBuilder {
     }
 
     public originToGeometry(): MeshBuilder {
-        const origin = new Vector3(0, 0, 0);
+        this.originTo(new Vector3(0, 0, 0));
+        return this;
+    }
 
+    public originTo(origin: Vector3): MeshBuilder {
         for (const vertex of this._vertices) {
             origin.add(vertex.position);
         }
@@ -348,6 +351,13 @@ export class MeshBuilder {
             vertex.position.subtract(origin);
         }
 
+        return this;
+    }
+
+    public scale(scale: Vector3): MeshBuilder {
+        for (const vertex of this._vertices) {
+            vertex.position.multiply(scale);
+        }
         return this;
     }
 

@@ -139,7 +139,7 @@ export class Renderer {
 
         this.addPass("gbuffer", new GBufferPass(this.canvas.width/2, this.canvas.height/2));
         this.addPass("lighting", new LightingPass(this.canvas.width/2, this.canvas.height/2));
-        this.addPass("blur", new BlurPass(this.canvas.width/2, this.canvas.height/2, 10));
+        this.addPass("blur", new BlurPass(this.canvas.width/2, this.canvas.height/2, 16));
         this.addPass("final", new FinalPass());
     }
 

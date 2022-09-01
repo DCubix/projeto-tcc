@@ -5,7 +5,6 @@ import { Shader } from "../shader";
 import fullScreen_vert from "../../shaders/fullscreen.vs";
 import blur_frag from "../../shaders/emit_blur.fs";
 import { GBufferPass } from "./gbuffer_pass";
-import { LightingPass } from "./lighting_pass";
 import { Mesh } from "../mesh";
 import { RenderTarget } from "../render_target";
 import { Texture2D, TextureFormat } from "../texture";
@@ -70,12 +69,12 @@ export class BlurPass extends RenderPass {
             gl.clear(gl.COLOR_BUFFER_BIT);
 
             const tex = (i == 0) ? gbuffer.target.color(0) : fbos[src].color(0);
+            tex.generateMipmap();
             tex.bind(0);
 
             gl.drawElements(gl.TRIANGLES, Mesh.defaultQuad.indexCount, gl.UNSIGNED_SHORT, 0);
 
             tex.unbind();
-            fbos[dst].color(0).generateMipmap();
 
             index = 1 - index;
         }

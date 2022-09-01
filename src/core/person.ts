@@ -1,10 +1,12 @@
-import { Matrix3, Matrix4, Quaternion, Vector2, Vector3, Vector4 } from "@math.gl/core";
+import { Matrix4, Quaternion, Vector2, Vector3 } from "@math.gl/core";
 import { Mesh, MeshBuilder, Vertex } from "../graphics/mesh";
 import { Material, Renderer } from "../graphics/renderer";
 import { Rotation, UVGenerator } from "../graphics/uv_generator";
-import { AnimationPlayMode, KeyframeGenerators, Transform3D, TransformAnimator } from "./animation_engine";
+import { AnimationPlayMode, KeyframeGenerators, TransformAnimator } from "./animation_engine";
 import { GameObject } from "./game_object";
 import { Scene } from "./scene";
+
+export const personScale = 0.75;
 
 export enum LimbType {
     LeftArm = 0,
@@ -186,7 +188,7 @@ export class Person extends GameObject {
             uvg.getRegion('torso:back')
         );
 
-        const [verts, inds] = mb.recalculateNormals().buildData();
+        const [verts, inds] = mb.scale(new Vector3(personScale, personScale, personScale)).recalculateNormals().buildData();
         this._mesh.update(verts, inds);
         
         this._vertices = verts;
@@ -217,7 +219,7 @@ export class Person extends GameObject {
         this._verticesTransformed = [];
         for (let i = 0; i < this._limbs.length; i++) {
             const limb = this._limbs[i];
-            const translate = new Matrix4().translate(limb.position);
+            const translate = new Matrix4().translate(limb.position.clone().multiplyByScalar(personScale));
             const rotate = new Matrix4().fromQuaternion(limb.rotation);
             const transform = translate.multiplyRight(rotate);
             

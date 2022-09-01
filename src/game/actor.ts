@@ -1,9 +1,8 @@
-import { Quaternion, Vector2, Vector3 } from "@math.gl/core";
+import { Quaternion, Vector3 } from "@math.gl/core";
 import { AnimationPlayMode } from "../core/animation_engine";
 import { Component } from "../core/component";
 import { FSM } from "../core/fsm";
-import { GameObject } from "../core/game_object";
-import { Person } from "../core/person";
+import { Person, personScale } from "../core/person";
 import { VoxelMap, VoxelType } from "./voxel_map";
 
 const gravity = -9.8;
@@ -36,13 +35,13 @@ export class Actor extends Component {
             
             let oldPosition = owner.localPosition.clone();
             owner.localPosition.x += fwd.x * deltaTime! * 3.0;
-            if (map.collided3DRadius(owner.localPosition, 0.35, 0.0, VoxelType.Wall, VoxelType.Door, VoxelType.Computer)) {
+            if (map.collided3DRadius(owner.localPosition, 0.35 * personScale, 0, VoxelType.Wall, VoxelType.Door, VoxelType.Computer)) {
                 owner.localPosition = oldPosition;
             }
 
             oldPosition = owner.localPosition.clone();
             owner.localPosition.z += fwd.z * deltaTime! * 3.0;
-            if (map.collided3DRadius(owner.localPosition, 0.35, 0.0, VoxelType.Wall, VoxelType.Door, VoxelType.Computer)) {
+            if (map.collided3DRadius(owner.localPosition, 0.35 * personScale, 0, VoxelType.Wall, VoxelType.Door, VoxelType.Computer)) {
                 owner.localPosition = oldPosition;
             }
         });
@@ -57,7 +56,7 @@ export class Actor extends Component {
         const map = this.owner!.scene!.findByTag("map")[0] as VoxelMap;
         let oldPosition = this.owner!.localPosition.clone();
         this.owner!.localPosition.y += gravity * deltaTime!;
-        if (map.collided3DRadius(this.owner!.localPosition, 0.35, 1.0, VoxelType.Floor)) {
+        if (map.collided3DRadius(this.owner!.localPosition, 0.35 * personScale, 0.39 * personScale, VoxelType.Floor)) {
             this.owner!.localPosition = oldPosition;
         }
 

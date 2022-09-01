@@ -9,7 +9,7 @@ uniform vec2 u_resolution;
 uniform vec2 u_direction;
 
 vec4 sampleEmit(vec2 uv) {
-  vec4 col = texture(u_inputTexture, uv, 2.0);
+  vec4 col = texture(u_inputTexture, uv);
   return vec4(col.rgb * col.a, 1.0);
 }
 

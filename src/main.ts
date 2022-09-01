@@ -72,7 +72,7 @@ class TestScene extends Scene {
         
         this.add(cam);
 
-        const light = new PointLight(0.9, 4.0, hsvToRgb(0.11, 0.3, 0.98));
+        const light = new PointLight(0.9, 3.0, hsvToRgb(0.11, 0.3, 0.98));
         light.tag = "light";
         light.localPosition.y = 0.5;
         light.localPosition.z = 0.4;
@@ -80,7 +80,7 @@ class TestScene extends Scene {
 
         light.setParent(person);
 
-        this.ambientColor = new Vector3(0.04, 0.0, 0.09);
+        this.ambientColor = new Vector3(0.03, 0.025, 0.1);
     }
 
     public onUpdate(deltaTime: number): void {
