@@ -1,4 +1,4 @@
-import { Vector3 } from "@math.gl/core";
+import { Vector3, Vector4 } from "@math.gl/core";
 import { Camera } from "./core/camera";
 import { Engine } from "./core/engine";
 import { Scene } from "./core/scene";
@@ -34,7 +34,7 @@ function hsvToRgb(h: number, s: number, v: number): Vector3 {
 class TestScene extends Scene {
     
     private _time: number = 0;
-
+    private _fps: number = 0;
     private _font?: Font;
 
     public async onSetup() {
@@ -85,6 +85,7 @@ class TestScene extends Scene {
 
     public onUpdate(deltaTime: number): void {
         this._time += deltaTime;
+        this._fps = 1.0 / deltaTime;
         const cam = this.findByTag("camera")[0] as Camera;
 
         // rotate person
@@ -98,7 +99,7 @@ class TestScene extends Scene {
     }
 
     public onRender(renderer: Renderer): void {
-        renderer.renderer2d.drawText(this._font!, 'Hello World!\nAttempting to draw some text here...', 10, 32, undefined, 0.3);
+        
     }
     
 }

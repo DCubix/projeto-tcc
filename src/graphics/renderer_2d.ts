@@ -67,8 +67,21 @@ export class Renderer2D {
         const ch = font.getChar(char);
         const sc = (scale || 1.0);
         if (!ch) return 20 * sc;
-        this.draw(font.texture, new Vector2(x, y - ((ch.bounds[3] - ch.descent) * sc)), new Vector2(sc, sc), new Vector4(ch.boundsNormalized), 0, color);
+        
+        const desc = (ch.bounds[3] - ch.descent) * sc;
+        this.draw(font.texture, new Vector2(x, y - desc), new Vector2(sc, sc), new Vector4(ch.boundsNormalized), 0, color);
         return ch.advance * sc;
+    }
+
+    public textWidth(font: Font, text: string, scale?: number): number {
+        const sc = (scale || 1.0);
+        let sizex = 0;
+        for (let i = 0; i < text.length; i++) {
+            const chr = font.getChar(text.charAt(i));
+            const w = chr === undefined ? 20 * sc : chr.advance * sc;
+            sizex += w;
+        }
+        return sizex;
     }
 
     public drawText(font: Font, text: string, x: number, y: number, color?: Vector4, scale?: number) {

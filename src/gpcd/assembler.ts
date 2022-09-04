@@ -1,5 +1,5 @@
 import { Option } from '../core/monad';
-import { DataType, OpCode, Register, VirtualMachine, DMAOffset, Value } from './vm';
+import { DataType, OpCode, Register, Value } from './vm';
 
 enum TokenType {
     Identifier,
