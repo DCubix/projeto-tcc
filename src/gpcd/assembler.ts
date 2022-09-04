@@ -17,7 +17,7 @@ enum TokenType {
     Keyword // jmp, mov ...
 }
 
-const KeywordsMap: { [name: string]: OpCode } = {
+export const KeywordsMap: { [name: string]: OpCode } = {
     'nop': OpCode.Nop,
     'mov': OpCode.Mov,
     'jmp': OpCode.Jmp,
@@ -35,9 +35,15 @@ const KeywordsMap: { [name: string]: OpCode } = {
     'rdi': OpCode.Rdi,
     'rst': OpCode.Rst,
     'hlt': OpCode.Hlt,
-    'db': OpCode.Db,
     'str': OpCode.Str
 };
+
+export function opCodeToString(opcode: OpCode): string {
+    for (let e of Object.entries(KeywordsMap)) {
+        if (e[1] == opcode) return e[0];
+    }
+    return '???';
+}
 
 class Token {
     type: TokenType;
@@ -221,7 +227,7 @@ export class Parser {
             return new Value(DataType.Immediate, val);
         } else if (this.accept(TokenType.Identifier)) {
             let id = this.last.value!.lexeme;
-            return new Value(DataType.Immediate, this._labelTable[id]);
+            return new Value(DataType.Immediate, this._labelTable[id], id);
         } else if (this.accept(TokenType.LParen)) {
             let result = this.parseExpression();
             this.expect(TokenType.RParen);
@@ -284,11 +290,13 @@ export class Parser {
         return result;
     }
 
-    private parseLabel(): void {
+    private parseLabel(): Value | undefined {
         if (this.accept(TokenType.Label)) {
             let id = this.last.value!.lexeme;
             this._labelTable[id] = this._programOutput.length;
+            return new Value(DataType.Label, this._programOutput.length, id);
         }
+        return undefined;
     }
 
     private parseInstruction(): Value[] {
@@ -298,7 +306,8 @@ export class Parser {
             ret.push(new Value(DataType.OpCode, KeywordsMap[kw] as number));
             ret.push(...this.parseArray());
         } else {
-            this.parseLabel();
+            let lbl = this.parseLabel();
+            if (lbl) ret.push(lbl);
         }
         return ret;
     }

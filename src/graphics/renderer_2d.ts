@@ -78,6 +78,14 @@ export class Renderer2D {
         this.draw(sheet.texture, new Vector2(bounds.x, bounds.y), new Vector2(xscale, yscale), new Vector4(srcx, srcy, srcw, srch), zIndex, color);
     }
 
+    public multiSprite(sheet: SpriteSheet, x: number, y: number, xIndex: number, yIndex: number, xCount: number, yCount: number, zIndex: number = 0, color?: Vector4) {
+        const srcw = (1.0 / sheet.horizontalCells) * xCount;
+        const srch = (1.0 / sheet.verticalCells) * yCount;
+        const srcx = (xIndex * sheet.cellWidth) / sheet.texture.width;
+        const srcy = (yIndex * sheet.cellHeight) / sheet.texture.height;
+        this.draw(sheet.texture, new Vector2(x, y), new Vector2(1, 1), new Vector4(srcx, srcy, srcw, srch), zIndex, color);
+    }
+
     public drawChar(font: Font, char: string, x: number, y: number, color?: Vector4, scale?: number): number {
         const ch = font.getChar(char);
         const sc = (scale || 1.0);

@@ -16,8 +16,8 @@ export enum OpCode {
     Rdi,
     Rst,
     Hlt,
-    Db,
-    Str
+    Str,
+    Label
 }
 
 export enum ComparisonOpCode {
@@ -41,7 +41,8 @@ export enum DataType {
     OpCode,
     Register,
     Address,
-    Pin
+    Pin,
+    Label
 }
 
 export const MaxMemorySize = 256;
@@ -51,11 +52,15 @@ export const DMAOffset = 0xC9;
 export class Value {
     private _type: DataType;
     private _value: number;
+    private _name?: string;
 
-    constructor(type: DataType, value: number) {
+    constructor(type: DataType, value: number, name?: string) {
         this._type = type;
         this._value = value & 0xFF;
+        this._name = name;
     }
+
+    get name(): string | undefined { return this._name; }
 
     get type(): DataType {
         return this._type;
@@ -209,7 +214,6 @@ export class VirtualMachine {
             case OpCode.Rdi: this._rdi(); break;
             case OpCode.Rst: this._rst(); break;
             case OpCode.Hlt: this._hlt(); break;
-            case OpCode.Db: this._db(); break;
             case OpCode.Str: this._str(); break;
             default: break;
         }
@@ -229,13 +233,6 @@ export class VirtualMachine {
 
         const value: number = this.registerGet(reg.value as Register);
         this._memory.write(dst.value, new Value(DataType.Immediate, value));
-    }
-
-    private  _db(): void {
-        // next until next opcode
-        while (this.current().type !== DataType.OpCode) {
-            this.advance();
-        }
     }
 
     private _mov(): void {
@@ -301,7 +298,7 @@ export class VirtualMachine {
     private _jmc(): void {
         const addr: Value = this.fetch();
         if (addr.type !== DataType.Immediate && addr.type !== DataType.Register) {
-            throw new Error(`(JMP) Invalid address type: ${addr.type}`);
+            throw new Error(`(JMC) Invalid address type: ${addr.type}`);
         }
         if (this.registerGet(Register.R) === 1) {
             this._pc = this._getValue(addr);
@@ -326,7 +323,7 @@ export class VirtualMachine {
         const dst: Value = this.fetch();
 
         if (dst.type !== DataType.Register) {
-            throw new Error(`(ADD) Invalid destination type: ${dst.type}`);
+            throw new Error(`(SUB) Invalid destination type: ${dst.type}`);
         }
 
         let a = this._getValue(src);
