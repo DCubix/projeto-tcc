@@ -9,5 +9,6 @@ in vec4 vs_color;
 uniform sampler2D u_tex;
 
 void main() {
-    fragColor = texture(u_tex, vs_uv) * vs_color;
+    vec4 col = texture(u_tex, vs_uv) * vs_color;
+    fragColor = /*col.a < 0.5 ? vec4(1.0, 0.0, 0.0, 1.0) : */col;
 }

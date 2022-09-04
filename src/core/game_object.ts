@@ -1,4 +1,5 @@
 import { Renderer } from "../graphics/renderer";
+import { Renderer2D } from "../graphics/renderer_2d";
 import { Component } from "./component";
 import { Scene } from "./scene";
 import { Transform } from "./transform";
@@ -71,5 +72,5 @@ export abstract class GameObject extends Transform {
         this.onUpdate(scene, deltaTime);
         this._components.forEach(component => component.onUpdate(deltaTime));
     }
-    
+
 }

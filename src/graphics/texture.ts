@@ -1,5 +1,7 @@
 import { Renderer } from "./renderer";
 
+let globalTextureID = 1;
+
 export enum TextureFormat {
     SingleComponent = 0,
     Rg8,
@@ -38,13 +40,16 @@ export abstract class TextureBase {
 
     protected _target: number;
     protected _id: WebGLTexture;
+    protected _internalId: number = 0;
     
     constructor(target: number) {
         this._target = target;
         this._id = Renderer.gl.createTexture()!;
+        this._internalId = globalTextureID++;
     }
 
     public get id(): WebGLTexture { return this._id; }
+    public get internalId(): number { return this._internalId; }
     public get target(): number { return this._target; }
 
 }

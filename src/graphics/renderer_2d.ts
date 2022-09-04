@@ -7,6 +7,7 @@ import { Renderer } from "./renderer";
 import default2d_vert from "../shaders/default2d.vs";
 import default2d_frag from "../shaders/default2d.fs";
 import { Font } from "./font";
+import { SpriteSheet } from "./sprite_sheet";
 
 type Batch = {
     offset: number
@@ -34,12 +35,15 @@ export class Renderer2D {
 
     private _projectionMatrix: Matrix4;
 
+    public get width(): number { return this._width; }
+    public get height(): number { return this._height; }
+
     constructor(width: number, height: number) {
         this._width = width;
-        this._height = height;
+        this._height = height;0
         this._mesh = new Mesh();
         this._shader = new Shader(default2d_vert, default2d_frag);
-        this._projectionMatrix = new Matrix4().ortho({ left: 0, right: width, bottom: height, top: 0, near: -1, far: 1 });
+        this._projectionMatrix = new Matrix4().ortho({ left: 0, right: width, bottom: height, top: 0, near: -1000, far: 1000 });
     }
 
     public draw(texture: Texture2D, position: Vector2, scale: Vector2, uv: Vector4, zIndex: number = 0, color?: Vector4) {
@@ -47,12 +51,13 @@ export class Renderer2D {
             position.x, position.y,
             texture.width * scale.x * uv.z, texture.height * scale.y * uv.w
         );
+        const z = zIndex;
         const shp = {
             vertices: [
-                new Vertex(new Vector3(dst.x, dst.y, zIndex), new Vector3(0, 0, 1), new Vector2(uv.x, uv.y), undefined, color),
-                new Vertex(new Vector3(dst.x + dst.z, dst.y, zIndex), new Vector3(0, 0, 1), new Vector2(uv.x + uv.z, uv.y), undefined, color),
-                new Vertex(new Vector3(dst.x + dst.z, dst.y + dst.w, zIndex), new Vector3(0, 0, 1), new Vector2(uv.x + uv.z, uv.y + uv.w), undefined, color),
-                new Vertex(new Vector3(dst.x, dst.y + dst.w, zIndex), new Vector3(0, 0, 1), new Vector2(uv.x, uv.y + uv.w), undefined, color)
+                new Vertex(new Vector3(dst.x, dst.y, z), new Vector3(0, 0, 1), new Vector2(uv.x, uv.y), undefined, color),
+                new Vertex(new Vector3(dst.x + dst.z, dst.y, z), new Vector3(0, 0, 1), new Vector2(uv.x + uv.z, uv.y), undefined, color),
+                new Vertex(new Vector3(dst.x + dst.z, dst.y + dst.w, z), new Vector3(0, 0, 1), new Vector2(uv.x + uv.z, uv.y + uv.w), undefined, color),
+                new Vertex(new Vector3(dst.x, dst.y + dst.w, z), new Vector3(0, 0, 1), new Vector2(uv.x, uv.y + uv.w), undefined, color)
             ],
             indices: [
                 0, 1, 2,
@@ -61,6 +66,16 @@ export class Renderer2D {
             texture: texture
         } as Shape;
         this._shapes.push(shp);
+    }
+
+    public sprite(sheet: SpriteSheet, spriteId: number, bounds: Vector4, zIndex: number = 0, color?: Vector4) {
+        const srcw = 1.0 / sheet.horizontalCells;
+        const srch = 1.0 / sheet.verticalCells;
+        const srcx = (spriteId % sheet.horizontalCells) * srcw;
+        const srcy = Math.floor(spriteId / sheet.horizontalCells) * srch;
+        const xscale = bounds.z / sheet.cellWidth;
+        const yscale = bounds.w / sheet.cellHeight;
+        this.draw(sheet.texture, new Vector2(bounds.x, bounds.y), new Vector2(xscale, yscale), new Vector4(srcx, srcy, srcw, srch), zIndex, color);
     }
 
     public drawChar(font: Font, char: string, x: number, y: number, color?: Vector4, scale?: number): number {
@@ -115,9 +130,7 @@ export class Renderer2D {
         for (let b of this._batches) {
             b.texture.bind(0);
             this._shader.setUniformInt('u_tex', 0);
-
-            gl.drawElements(gl.TRIANGLES, b.indicesCount, gl.UNSIGNED_SHORT, b.offset);
-
+            gl.drawElements(gl.TRIANGLES, b.indicesCount, gl.UNSIGNED_SHORT, b.offset * 2);
             b.texture.unbind();
         }
 
@@ -136,11 +149,12 @@ export class Renderer2D {
         if (this._shapes.length === 0) return;
 
         const mb = new MeshBuilder();
-        this._shapes.sort((a, b) => a.texture.id != b.texture.id ? -1 : 1);
-        
+        this._shapes.sort((a, b) => a.texture.internalId < b.texture.internalId ? -1 : 1);
+
         let vertexOffset = 0;
+        
         const first = this._shapes[0];
-        mb.addIndices(first.indices, 0);
+        mb.addIndices(first.indices);
         vertexOffset += mb.addVertices(first.vertices);
         
         this._batches.push({
@@ -153,17 +167,16 @@ export class Renderer2D {
         for (let i = 1; i < this._shapes.length; i++) {
             let a = this._shapes[i];
             let b = this._shapes[i - 1];
-            let za = a.vertices.length == 0 ? 0 : a.vertices[0].position.z;
-            let zb = b.vertices.length == 0 ? 0 : b.vertices[0].position.z;
-            if (a.texture.id != b.texture.id || za != zb) {
-                offset += this._batches[this._batches.length - 1].indicesCount;
+
+            if (a.texture.internalId != b.texture.internalId) {
+                offset += this._batches.at(-1)!.indicesCount;
                 this._batches.push({
                     offset: offset,
                     texture: a.texture,
                     indicesCount: a.indices.length
                 } as Batch);
             } else {
-                this._batches[this._batches.length - 1].indicesCount += a.indices.length;
+                this._batches.at(-1)!.indicesCount += a.indices.length;
             }
 
             mb.addIndices(a.indices, vertexOffset);

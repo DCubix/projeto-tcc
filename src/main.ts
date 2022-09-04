@@ -1,4 +1,4 @@
-import { Vector3, Vector4 } from "@math.gl/core";
+import { Vector3 } from "@math.gl/core";
 import { Camera } from "./core/camera";
 import { Engine } from "./core/engine";
 import { Scene } from "./core/scene";
@@ -7,8 +7,8 @@ import { Util } from "./core/util";
 import { PointLight } from "./core/point_light";
 import { VoxelMap } from "./game/voxel_map";
 import { Player } from "./game/player";
-import { Font } from "./graphics/font";
 import { Person } from "./core/person";
+import { Computer } from "./game/computer";
 
 function hsvToRgb(h: number, s: number, v: number): Vector3 {
     let r, g, b, i, f, p, q, t;
@@ -31,14 +31,13 @@ function hsvToRgb(h: number, s: number, v: number): Vector3 {
     return new Vector3(r, g, b);
 }
 
-class TestScene extends Scene {
-    
-    private _time: number = 0;
-    private _fps: number = 0;
-    private _font?: Font;
+class GameScene extends Scene {
+
+    private _computer?: Computer;
 
     public async onSetup() {
-        this._font = await Font.fromFile('game-font.png', 'game-font-data.json');
+        this._computer = new Computer();
+        await this._computer!.load();
 
         const map = new VoxelMap();
         map.tag = "map";
@@ -84,8 +83,6 @@ class TestScene extends Scene {
     }
 
     public onUpdate(deltaTime: number): void {
-        this._time += deltaTime;
-        this._fps = 1.0 / deltaTime;
         const cam = this.findByTag("camera")[0] as Camera;
 
         // rotate person
@@ -99,11 +96,11 @@ class TestScene extends Scene {
     }
 
     public onRender(renderer: Renderer): void {
-        
+        this._computer!.render(renderer.renderer2d);
     }
     
 }
 
 const eng = new Engine(document.getElementById("game") as HTMLCanvasElement);
-eng.setScene(new TestScene());
+eng.setScene(new GameScene());
 eng.start();
